@@ -1,0 +1,142 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins&display=swap");
+ .container .img-box img{
+  width: 100%;
+  height: 100%;
+}
+
+*{
+  padding: 0;
+  margin: 0;
+  font-family: 'Poppins', 'sans-serif';
+  box-sizing: border-box;
+}
+
+body{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+}
+
+.container{
+  width: 100%;
+  height: 90%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 150px;
+  border-radius: 40px;
+  overflow: hidden;
+  box-shadow: 10px 10px 10px -1px rgba(10,99,169,0.16),
+  -10px -10px 10px -1px rgba(2255,255,255,0.7);
+}
+
+.container .img-box{
+  height: 100%;
+  width: 50%;
+  position: relative;
+  overflow: hidden;
+  /*background-color: black; */
+}
+
+
+.container .content-box{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+}
+
+.container .content-box .content{
+  width: 65%;
+}
+
+.container .content-box .content h2{
+  color: rgba(0, 0,0,0.8);
+  border-bottom: 3px solid black;
+  text-align: center;
+  display: inline-block;
+  margin-bottom: 30px;
+  font-size: 1.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.img-box .img {
+  position: absolute;
+  bottom: 45%;
+  left: 45%;
+  max-width: 100%;
+  width: 60%;
+  align-items: center;
+  transform: translate(-50%, -50%);
+  background-color: rgba(255, 255, 0, 0.1);
+  border-radius: 30px;
+}
+
+.input-box label{
+  display: block;
+  color: rgba(0, 0,0,0.7);
+  letter-spacing: 1px;
+}
+
+.input-box input{
+  width: 100%;
+  height: 50px;
+  padding: 0 30px;
+  border-radius: 60px;
+  margin: 10px 0;
+  outline: none;
+  border: none;
+  font-size: 0.9rem;
+  box-shadow: 5px 5px 5px -1px rgba(10,99,169,0.16),
+  -7px -7px 5px -1px rgba(2255,255,255,0.7);
+}
+
+.input-box input[type="checkbox"]{
+  width: 15px;
+  height: 15px;
+  margin-right: 10px;
+  margin-bottom: 20px;
+}
+
+
+.input-box input[type="submit"]{
+  background-color: rgb(1, 33, 105, 0.6);
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+@media (max-width: 768px){
+  .container{
+    margin: 40px;
+  }
+  .container .img-box{
+    display: none;
+  }
+  .container .content-box{
+    width: 100%;
+  }
+  .container .content-box .content{
+    width: 75%;
+  }
+}
+
+@media (max-width: 962px){
+  .container{
+    margin: 40px;
+  }
+  .container .img-box{
+    display: none;
+  }
+  .container .content-box{
+    width: 100%;
+  }
+  .container .content-box .content{
+    width: 75%;
+  }
+}
