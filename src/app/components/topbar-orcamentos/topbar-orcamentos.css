@@ -1,0 +1,26 @@
+i.bx {
+  font-size: 40px;
+  position: relative;
+  top: 40px;
+  color: #E4E9F7;
+  z-index: 3;
+}
+
+.topbar {
+  justify-content: end;
+  position: fixed;
+  display: grid;
+  grid-template-columns: repeat(2, 65px);
+  grid-gap: 9px 30px;
+  top: 0px;
+  left: 0px;
+  height: 120px;
+  width: 100%;
+  z-index: 1;
+  background: var(--sidebar-color);
+}
+
+
+
+
+

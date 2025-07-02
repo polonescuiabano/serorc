@@ -1,0 +1,49 @@
+<h2>Detalhes da Composição: {{ composicao.nome }}</h2>
+
+<p>Tipo: {{ composicao.tipo }}</p>
+
+<h3>Insumos</h3>
+<table>
+  <tr>
+    <th>Código</th>
+    <th>Descrição</th>
+    <th>Unidade</th>
+    <th>Valor Onerado</th>
+    <th>Valor Desonerado</th>
+    <th>Coeficiente</th>
+  </tr>
+  <tr *ngFor="let insumo of insumos">
+    <td>{{ insumo.codigo }}</td>
+    <td>{{ insumo.descricao }}</td>
+    <td>{{ insumo.unidade }}</td>
+    <td>{{ insumo.valorOnerado }}</td>
+    <td>{{ insumo.valorDesonerado }}</td>
+    <td>{{ insumo.coeficiente }}</td>
+  </tr>
+</table>
+
+<h3>Composições Auxiliares</h3>
+<table>
+  <tr>
+    <th>Código</th>
+    <th>Descrição</th>
+    <th>Unidade</th>
+    <th>Valor Onerado</th>
+    <th>Valor Desonerado</th>
+    <th>Coeficiente</th>
+  </tr>
+  <tr *ngFor="let compAux of composicoesAuxiliares">
+    <td>{{ compAux.codigo }}</td>
+    <td>{{ compAux.descricao }}</td>
+    <td>{{ compAux.unidade }}</td>
+    <td>{{ compAux.valorOnerado }}</td>
+    <td>{{ compAux.valorDesonerado }}</td>
+    <td>{{ compAux.coeficiente }}</td>
+  </tr>
+</table>
+
+<div *ngIf="isProprio">
+  <button (click)="adicionarInsumo()">Adicionar Insumo</button>
+  <button (click)="adicionarComposicaoAuxiliar()">Adicionar Composição Auxiliar</button>
+</div>
+

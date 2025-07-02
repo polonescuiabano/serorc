@@ -1,0 +1,21 @@
+<app-sidebar></app-sidebar>
+<app-topbar-orcamentos></app-topbar-orcamentos>
+
+<h2>Pastas</h2>
+<ul>
+  <li *ngFor="let pasta of pastas">
+    📁 <span (click)="abrirPasta(pasta._id)" style="cursor: pointer;">{{ pasta.nome }}</span>
+    <button (click)="deletarPasta(pasta._id)">Excluir</button>
+  </li>
+</ul>
+
+<h2>Orçamentos</h2>
+<ul>
+  <div class="orcamentos">
+    <li *ngFor="let orcamento of orcamentos">
+      📄 <span (click)="abrirOrcamento(orcamento.id)" style="cursor: pointer;">{{ orcamento.nome }}</span>
+      <button (click)="deletarOrcamento(orcamento.id)">Excluir</button>
+    </li>
+  </div>
+</ul>
+

@@ -1,0 +1,51 @@
+
+
+
+<div class="search-form">
+  <label>Pesquisar por:</label>
+  <select [(ngModel)]="searchBy">
+    <option value="codigo">Código</option>
+    <option value="descricao">Descrição</option>
+  </select>
+
+  <input type="text" [(ngModel)]="query" placeholder="Digite o código ou descrição" />
+
+  <label>Base:</label>
+  <select [(ngModel)]="tipo">
+    <option value="SINAPI">SINAPI</option>
+    <option value="SICRO">SICRO</option>
+    <option value="PROPRIO">PRÓPRIO</option>
+  </select>
+
+  <label>Período:</label>
+  <input type="month" [(ngModel)]="periodo" />
+
+  <button (click)="buscar()">Buscar</button>
+</div>
+
+<table *ngIf="resultados.length">
+  <thead>
+  <tr>
+    <th>Base</th>
+    <th>Data</th>
+    <th>Código</th>
+    <th>Descrição</th>
+    <th>Tipo</th>
+    <th>Un.</th>
+    <th>Valor Onerado</th>
+    <th>Valor Desonerado</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let item of resultados" (click)="abrirDetalhes(item.codigo)">
+    <td>{{ item.base }}</td>
+    <td>{{ item.data }}</td>
+    <td>{{ item.codigo }}</td>
+    <td>{{ item.descricao }}</td>
+    <td>{{ item.tipo }}</td>
+    <td>{{ item.unidade }}</td>
+    <td>{{ item.valorOnerado }}</td>
+    <td>{{ item.valorDesonerado }}</td>
+  </tr>
+  </tbody>
+</table>
