@@ -9,6 +9,8 @@ import {Insumos} from './components/pages/insumos/insumos';
 import {CreateInsumos} from './components/pages/create-insumos/create-insumos';
 import {CreateComp} from './components/pages/create-comp/create-comp';
 import {Detalhescomposicao} from './components/pages/detalhescomposicao/detalhescomposicao';
+import {Eventograma} from './services/eventograma';
+import {EventogramaComponent} from './components/pages/eventograma/eventograma';
 
 export const routes: Routes = [
   {
@@ -24,6 +26,11 @@ export const routes: Routes = [
   {
     path: 'detalhes-orcamento/:id',
     component: Detalhesorcamento,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'eventograma/:id',
+    component: EventogramaComponent,
     canActivate: [authGuard]
   },
   {

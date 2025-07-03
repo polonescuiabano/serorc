@@ -25,6 +25,7 @@ export class Detalhesorcamento implements OnInit{
   editandoItem: any;
 
 
+
   constructor(
     private route: ActivatedRoute,
     private svc: DetalhesorcamentoService,
@@ -49,7 +50,7 @@ export class Detalhesorcamento implements OnInit{
       Setembro: '09', Outubro: '10', Novembro: '11', Dezembro: '12'
     };
 
-    const [mes, ano] = periodo.split('/');
+    const [mes, ano] = periodo.split('-');
     const mesNumerico = meses[mes.trim()] ?? mes;
     return `${mesNumerico}/${ano}`;
   }
@@ -62,7 +63,27 @@ export class Detalhesorcamento implements OnInit{
     return `${nome} ${periodoFormatado}`;
   }
 
-  iniciarAdicionar(tipo: 'etapa' | 'subetapa' | 'composicao' | 'insumo', parent?: ItemOrcamento) {
+  iniciarAdicionarEtapa() {
+    // Pega os níveis que são somente raiz (sem ponto)
+    const niveisRaiz = this.orcamento.itens
+      .map(i => i.nivel.toString())
+      .filter(n => !n.includes('.'))
+      .map(n => parseInt(n, 10));
+
+    // Define o próximo nível raiz
+    const proximoNivel = Math.max(0, ...niveisRaiz) + 1;
+    const nivel = proximoNivel.toString();
+
+    this.novaEtapa = {
+      nivel: proximoNivel,
+      descricao: '',
+      quantidade: 1,
+      tipo: 'etapa',
+    };
+  }
+
+
+  iniciarAdicionar(tipo: | 'subetapa' | 'composicao' | 'insumo', parent?: ItemOrcamento) {
     let nivel: string;
 
     if (parent) {
@@ -124,12 +145,12 @@ export class Detalhesorcamento implements OnInit{
 
     if (this.editandoItem.tipo === 'composicao') {
       comp$ = codigo
-        ? this.compSvc.buscarPorCodigo(codigo, nomeBanco, periodo)
-        : this.compSvc.buscarPorNome(descricao ?? '', nomeBanco, periodo);
+        ? this.compSvc.buscarPorCodigo(codigo, nomeBanco, this.formatarPeriodo(periodo))
+        : this.compSvc.buscarPorNome(descricao ?? '', nomeBanco,  this.formatarPeriodo(periodo));
     } else {
       comp$ = codigo
-        ? this.insSvc.buscarPorCodigo(codigo, nomeBanco, periodo)
-        : this.insSvc.buscarPorNome(descricao ?? '', nomeBanco, periodo);
+        ? this.insSvc.buscarPorCodigo(codigo, nomeBanco,  this.formatarPeriodo(periodo))
+        : this.insSvc.buscarPorNome(descricao ?? '', nomeBanco,  this.formatarPeriodo(periodo));
     }
 
     comp$.subscribe({
@@ -208,6 +229,7 @@ export class Detalhesorcamento implements OnInit{
   load(id: string) {
     this.svc.getOrcamento(id)
       .subscribe(o => {
+        console.log('Orçamento recebido do backend:', o);
         this.orcamento = this.calculate(o);
       });
   }
@@ -280,7 +302,7 @@ export class Detalhesorcamento implements OnInit{
       quantidade: this.novaEtapa.quantidade,
       tipo: 'etapa'
     };
-
+    console.log(payload);
     this.svc.adicionarItem(this.orcamento.id, payload)
       .subscribe(o => {
         this.orcamento = o;

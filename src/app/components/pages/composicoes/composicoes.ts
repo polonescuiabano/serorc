@@ -33,9 +33,8 @@ export class Composicoes {
       return;
     }
 
-    const periodoFormatado = this.periodo
-      ? this.periodo.split('-').reverse().join('/')
-      : '';
+    const [ano, mes] = this.periodo.split('-');
+    const periodoFormatado = `${mes.padStart(2, '0')}-${ano}`;
 
     if (this.searchBy === 'codigo') {
       this.composicoesService.buscarPorCodigo(this.query, this.tipo, periodoFormatado).subscribe(data => {

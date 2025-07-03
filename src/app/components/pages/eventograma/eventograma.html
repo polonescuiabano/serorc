@@ -1,1 +1,88 @@
-<p>eventograma works!</p>
+<h2>Eventos</h2>
+<div>
+  <input type="text" placeholder="Nome do evento" [formControl]="nomeEvento">
+  <input type="text" placeholder="Número do evento" [formControl]="numeroEvento">
+  <button *ngIf="!editEventoId" (click)="adicionarEvento()">Adicionar Evento</button>
+  <button *ngIf="editEventoId" (click)="salvarEdicaoEvento()">Salvar Alteração</button>
+  <button *ngIf="editEventoId" (click)="editEventoId=null; novoEventoForm.reset()">Cancelar</button>
+</div>
+
+<table>
+  <tr *ngFor="let evento of eventos">
+    <td>{{ evento._id }}</td>
+    <td>{{ evento.numero }}</td>
+    <td>{{ evento.nome }}</td>
+    <td>
+      <button (click)="editarEvento(evento)">Editar</button>
+      <button (click)="excluirEvento(evento._id!)">Excluir</button>
+    </td>
+  </tr>
+</table>
+
+<h2>Frentes de Obra</h2>
+<div>
+  <input type="text" placeholder="Nome da frente" [formControl]="nomeFrente">
+  <button *ngIf="!editFrenteId" (click)="adicionarFrente()">Adicionar Frente</button>
+  <button *ngIf="editFrenteId" (click)="salvarEdicaoFrente()">Salvar Alteração</button>
+  <button *ngIf="editFrenteId" (click)="editFrenteId=null; novaFrenteForm.reset()">Cancelar</button>
+</div>
+
+<table>
+  <tr *ngFor="let frente of frentes">
+    <td>{{ frente._id }}</td>
+    <td>{{ frente.nome }}</td>
+    <td>
+      <button (click)="editarFrente(frente)">Editar</button>
+      <button (click)="excluirFrente(frente._id!)">Excluir</button>
+    </td>
+  </tr>
+</table>
+
+<h2>Itens do Orçamento</h2>
+<table border="1" cellspacing="0" cellpadding="5" style="width: 100%;">
+  <thead>
+  <tr>
+    <th>Evento</th>
+    <th>Nível</th>
+    <th>Código</th>
+    <th>Tipo</th>
+    <th>Descrição</th>
+    <th>UND</th>
+    <th>Quantidade</th>
+    <th>Preço Unitário</th>
+    <th>Valor c/ BDI</th>
+    <th>Total</th>
+    <th *ngFor="let frente of frentes">{{ frente.nome }}</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let item of orcamento?.itens" [style.paddingLeft.px]="getIndentation(item.nivel)">
+    <td>
+      <select [ngModel]="item.eventoId" (ngModelChange)="onEventoChange(item, $event)">
+        <option [ngValue]="null">Sem evento</option>
+        <option *ngFor="let evento of eventos" [ngValue]="evento._id">{{ evento.nome }}</option>
+      </select>
+    </td>
+
+    <td>{{ item.nivel }}</td>
+    <td>{{ item.codigo || '-' }}</td>
+    <td>{{ item.tipo }}</td>
+    <td>{{ item.descricao }}</td>
+    <td>{{ item.unidade }}</td>
+    <td>{{ item.quantidade }}</td>
+    <td>{{ item.precoUnitario | currency }}</td>
+    <td>{{ item.valorComBdi | currency }}</td>
+    <td>{{ item.total | currency }}</td>
+
+    <td *ngFor="let frente of frentes">
+      <input
+        type="number"
+        [value]="getQuantidadeFrente(item, frente._id)"
+        (input)="onInputQuantidade($event, item, frente)"
+        style="width: 60px;"
+        min="0"
+      />
+    </td>
+  </tr>
+  </tbody>
+</table>

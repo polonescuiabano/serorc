@@ -15,6 +15,8 @@ export interface ItemOrcamento {
   valorComBdi?: number;
   total?: number;
   tipo?: string;
+  eventoId?: string| null;
+  frentesDeObra?: { frenteDeObraId: string; quantidade: number }[];
 }
 
 export interface OrcamentoDetalhes {
@@ -39,6 +41,7 @@ export class DetalhesorcamentoService {
   }
 
   adicionarItem(orcamentoId: string, item: Partial<ItemOrcamento>): Observable<OrcamentoDetalhes> {
+    console.log('Enviando item:', item);
     return this.http.post<OrcamentoDetalhes>(`${this.apiUrl}/orcamentos/${orcamentoId}/itens`, item);
   }
 

@@ -1,13 +1,10 @@
-
 <h2>Detalhes: {{orcamento?.nome}}</h2>
+<button (click)="iniciarAdicionarEtapa()">+ Etapa</button>
 
-<button (click)="iniciarAdicionar('etapa')">+ Etapa</button>
-
-<!-- Linha para nova etapa ou subetapa -->
 <tr *ngIf="novaEtapa">
   <td><input type="text" [(ngModel)]="novaEtapa.nivel" readonly /></td>
   <td></td>
-  <td>{{ novaEtapa.tipo }}</td>
+  <td>etapa</td>
   <td><input type="text" [(ngModel)]="novaEtapa.descricao" placeholder="Descrição" /></td>
   <td></td>
   <td><input type="number" [(ngModel)]="novaEtapa.quantidade" /></td>
@@ -17,6 +14,7 @@
     <button (click)="cancelarNovaEtapa()">✖</button>
   </td>
 </tr>
+
 
 
 <table *ngIf="orcamento && orcamento.itens?.length">
@@ -29,7 +27,10 @@
   </thead>
   <tbody>
 
-  <!-- Linha de edição/inserção -->
+
+
+
+    <!-- Linha de edição/inserção -->
   <tr *ngIf="editandoItem">
     <td><input type="number" [(ngModel)]="editandoItem.item.nivel" /></td>
     <input [(ngModel)]="editandoItem.buscaCodigo" placeholder="Código"

@@ -29,6 +29,9 @@ export class InsumosService {
     return this.http.get<Insumo[]>(`${this.baseUrl}/insumos/buscar-por-nome/${nome}/${tipo}`, { params });
   }
 
+  salvarInsumo(data: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/insumos/salvar`, data);
+  }
 
   buscarPorCodigo(codigo: string, tipo: string, periodo: string): Observable<Insumo[]> {
     return this.http.get<Insumo[]>(`${this.baseUrl}/insumos/buscar-por-codigo/${codigo}/${tipo}`, {

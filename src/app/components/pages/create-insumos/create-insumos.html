@@ -1,1 +1,25 @@
-<p>create-insumos works!</p>
+<form [formGroup]="insumoForm" (ngSubmit)="onSubmit()">
+  <label>Código:</label>
+  <input formControlName="codigo" required>
+
+  <label>Nome:</label>
+  <input formControlName="nome" required>
+
+  <label>Tipo:</label>
+  <input formControlName="tipo" required>
+
+  <label>Unidade de Medida:</label>
+  <input formControlName="unidadeMedida">
+
+  <label>Valor Desonerado:</label>
+  <input formControlName="valorDesonerado" type="number" step="0.01" required>
+
+  <label>Valor Não Desonerado:</label>
+  <input formControlName="valorNaoDesonerado" type="number" step="0.01" required>
+
+  <label>Data de Cotação:</label>
+  <input formControlName="data" type="date" required>
+
+  <button type="submit">Salvar Insumo</button>
+</form>
+

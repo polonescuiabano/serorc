@@ -33,8 +33,7 @@ export class Insumos {
     }
 
     const periodoFormatado = this.periodo
-      ? this.periodo.split('-').reverse().join('/')
-      : '';
+    ;
 
     if (this.searchBy === 'codigo') {
       this.insumosService.buscarPorCodigo(this.query, this.tipo, periodoFormatado).subscribe(data => {
