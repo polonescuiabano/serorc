@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import { InsumosService} from '../../../services/insumos';
-import {CommonModule} from '@angular/common';
-import {AuthService} from '../../../services/auth.service';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { InsumosService } from '../../../services/insumos';
+import { CommonModule } from '@angular/common';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-create-insumos',
@@ -24,10 +24,10 @@ export class CreateInsumos {
     this.insumoForm = this.fb.group({
       codigo: ['', Validators.required],
       nome: ['', Validators.required],
-      tipo: ['', Validators.required],
+      // tipo fixo, não aparece no form
       unidadeMedida: [''],
       valorDesonerado: ['', Validators.required],
-      valorNaoDesonerado: ['', Validators.required],
+      valorOnerado: ['', Validators.required],
       data: ['', Validators.required]
     });
   }
@@ -49,6 +49,7 @@ export class CreateInsumos {
 
     const payload = {
       ...this.insumoForm.value,
+      tipo: 'PROPRIO',          // tipo fixo
       empresa: empresa,
       valorDesonerado: parseFloat(this.insumoForm.value.valorDesonerado),
       valorNaoDesonerado: parseFloat(this.insumoForm.value.valorNaoDesonerado)

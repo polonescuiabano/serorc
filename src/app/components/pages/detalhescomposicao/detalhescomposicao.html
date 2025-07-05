@@ -1,49 +1,71 @@
-<h2>Detalhes da Composição: {{ composicao.nome }}</h2>
+<!-- Botões para iniciar adicionar insumo ou composição auxiliar -->
+<button *ngIf="isProprio" (click)="iniciarAdicionar('insumo')">Adicionar Insumo</button>
+<button *ngIf="isProprio" (click)="iniciarAdicionar('composicao')">Adicionar Composição Auxiliar</button>
 
-<p>Tipo: {{ composicao.tipo }}</p>
 
+<!-- Lista de Insumos -->
 <h3>Insumos</h3>
-<table>
-  <tr>
-    <th>Código</th>
-    <th>Descrição</th>
-    <th>Unidade</th>
-    <th>Valor Onerado</th>
-    <th>Valor Desonerado</th>
-    <th>Coeficiente</th>
-  </tr>
-  <tr *ngFor="let insumo of insumos">
-    <td>{{ insumo.codigo }}</td>
-    <td>{{ insumo.descricao }}</td>
-    <td>{{ insumo.unidade }}</td>
-    <td>{{ insumo.valorOnerado }}</td>
-    <td>{{ insumo.valorDesonerado }}</td>
-    <td>{{ insumo.coeficiente }}</td>
-  </tr>
-</table>
+<ul *ngIf="composicao?.insumos?.length > 0; else semInsumos">
+  <li *ngFor="let insumo of composicao.insumos">
+    Código: {{ insumo.insumoId }} - Coeficiente: {{ insumo.coeficiente }}
+  </li>
+</ul>
+<ng-template #semInsumos>
+  <p>Não há insumos adicionados.</p>
+</ng-template>
 
+<!-- Lista de Composições Auxiliares -->
 <h3>Composições Auxiliares</h3>
-<table>
-  <tr>
-    <th>Código</th>
-    <th>Descrição</th>
-    <th>Unidade</th>
-    <th>Valor Onerado</th>
-    <th>Valor Desonerado</th>
-    <th>Coeficiente</th>
-  </tr>
-  <tr *ngFor="let compAux of composicoesAuxiliares">
-    <td>{{ compAux.codigo }}</td>
-    <td>{{ compAux.descricao }}</td>
-    <td>{{ compAux.unidade }}</td>
-    <td>{{ compAux.valorOnerado }}</td>
-    <td>{{ compAux.valorDesonerado }}</td>
-    <td>{{ compAux.coeficiente }}</td>
-  </tr>
-</table>
+<ul *ngIf="composicao?.composicoesAuxiliares?.length > 0; else semCompsAux">
+  <li *ngFor="let compAux of composicao.composicoesAuxiliares">
+    Código: {{ compAux.codigo }} - Coeficiente: {{ compAux.coeficiente }}
+  </li>
+</ul>
+<ng-template #semCompsAux>
+  <p>Não há composições auxiliares adicionadas.</p>
+</ng-template>
 
-<div *ngIf="isProprio">
-  <button (click)="adicionarInsumo()">Adicionar Insumo</button>
-  <button (click)="adicionarComposicaoAuxiliar()">Adicionar Composição Auxiliar</button>
+<!-- Formulário de adição (só aparece quando estiver editando) -->
+<div *ngIf="editando" class="adicionar-form">
+  <h4>Adicionar {{ editando.tipo === 'insumo' ? 'Insumo' : 'Composição Auxiliar' }}</h4>
+
+  <label>
+    Código:
+    <input [(ngModel)]="editando.buscaCodigo" placeholder="Código" />
+  </label>
+  <label>
+    Descrição:
+    <input [(ngModel)]="editando.buscaDescricao" placeholder="Descrição" />
+  </label>
+  <button (click)="onBuscarRealTime()">Buscar</button>
+
+  <!-- Lista de resultados filtrados -->
+  <ul *ngIf="editando.resultados.length > 0" class="resultados-lista">
+    <li *ngFor="let r of editando.resultados" (click)="selecionar(r)" class="resultado-item">
+      <strong>{{ r.codigo }}</strong> – {{ editando.tipo === 'insumo' ? r.nome : r.descricao }}
+    </li>
+  </ul>
+
+  <p *ngIf="editando.resultados.length === 0 && (editando.buscaCodigo || editando.buscaDescricao)">
+    Nenhum resultado encontrado.
+  </p>
+
+  <!-- Exibe dados do item selecionado + coeficiente para preencher -->
+  <div *ngIf="editando.item.codigo" class="selecionado">
+    <p>Selecionado: <strong>{{ editando.item.codigo }} – {{ editando.item.descricao }}</strong></p>
+    <label>
+      Coeficiente:
+      <input
+        type="number"
+        step="0.0001"
+        min="0"
+        [(ngModel)]="editando.item.coeficiente"
+        placeholder="Informe coeficiente"
+      />
+    </label>
+    <button [disabled]="!editando.item.coeficiente || editando.item.coeficiente <= 0" (click)="confirmarEdicao()">
+      Confirmar
+    </button>
+    <button (click)="cancelarEdicao()">Cancelar</button>
+  </div>
 </div>
-

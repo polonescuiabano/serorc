@@ -34,8 +34,9 @@ export class OrcamentosService {
   }
 
   deletarOrcamento(orcamentoId: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/orcamentos/${orcamentoId}`);
+    return this.http.delete(`${this.apiUrl}/orcamentos?id=${orcamentoId}`);
   }
+
 
   deletarPasta(pastaId: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/pastas/${pastaId}`);

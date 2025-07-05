@@ -39,7 +39,7 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
-    path: 'detalhes-composicao/:codigo',
+    path: 'detalhes-composicao/:id',
     component: Detalhescomposicao,
     canActivate: [authGuard]
   },

@@ -5,11 +5,15 @@ import {environment} from '../../environments/environment';
 
 
 export interface Composicao {
-  id: number;
+  id: string;
   codigo: string;
   nome: string;
   unidadeMedida: string;
   precoDesonerado: number;
+  precoNaoDesonerado: number;
+  dataCotacao: string;
+  empresa: string;
+  tipo: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -28,6 +32,21 @@ export class ComposicoesService {
     );
   }
 
+  salvarComposicao(dto: Composicao): Observable<any> {
+    return this.http.post(`${this.baseUrl}/composicoes/salvar`, dto);
+  }
+
+  adicionarInsumo(idComposicao: string, payload: { insumoId: string, coeficiente: number }): Observable<any> {
+    return this.http.post(`${this.baseUrl}/composicoes/${idComposicao}/adicionar-insumo`, payload);
+  }
+
+  adicionarComposicaoAuxiliar(idComposicao: string, payload: { codigoAuxiliar: string, coeficiente: number }): Observable<any> {
+    return this.http.post(`${this.baseUrl}/composicoes/${idComposicao}/adicionar-composicao`, payload);
+  }
+
+  getDetalhesComposicao(idComposicao: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/composicoes/detalhes/${idComposicao}`);
+  }
 
   buscarPorCodigo(codigo: string, tipo: string, periodo?: string): Observable<Composicao[]> {
     const codigoEncoded = encodeURIComponent(codigo.trim());
@@ -43,9 +62,6 @@ export class ComposicoesService {
     return this.http.get<Composicao[]>(url);
   }
 
-  getDetalhesComposicao(codigo: string): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/composicoes/detalhes/${codigo}`);
-  }
 
 
   buscarTodos(): Observable<Composicao[]> {
