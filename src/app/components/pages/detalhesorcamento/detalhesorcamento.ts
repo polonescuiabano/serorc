@@ -5,25 +5,28 @@ import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {Composicao, ComposicoesService} from '../../../services/composicoes';
 import {Insumo, InsumosService} from '../../../services/insumos';
-import { HttpErrorResponse } from '@angular/common/http';
 import {TopbarDetalhesorcamento} from '../../topbar-detalhesorcamento/topbar-detalhesorcamento';
 import {Observable} from 'rxjs';
+import {Sidebar} from '../../sidebar/sidebar';
+import {TopbarListacomp} from '../../topbar-listacomp/topbar-listacomp';
 
 
 @Component({
   selector: 'app-detalhesorcamento',
-  imports: [CommonModule, FormsModule, TopbarDetalhesorcamento],
-  templateUrl: './detalhesorcamento.html',
+  imports: [CommonModule, FormsModule, TopbarDetalhesorcamento, Sidebar, TopbarListacomp],
+  templateUrl:'./detalhesorcamento.html',
   styleUrl: './detalhesorcamento.css'
 })
 export class Detalhesorcamento implements OnInit{
   orcamento!: OrcamentoDetalhes;
   novaEtapa?: Partial<ItemOrcamento>;
   selectedItem?: ItemOrcamento;
+  totalSemBDI: number = 0;
+  totalComBDI: number = 0;
+  totalFinal: number = 0;
 
 
   editandoItem: any;
-
 
 
   constructor(
@@ -63,6 +66,25 @@ export class Detalhesorcamento implements OnInit{
     return `${nome} ${periodoFormatado}`;
   }
 
+
+  get itensOrdenados() {
+    if (!this.orcamento || !this.orcamento.itens) return [];
+
+    return this.orcamento.itens.slice().sort((a, b) => {
+      const nivelA = a.nivel.toString().split('.').map(Number);
+      const nivelB = b.nivel.toString().split('.').map(Number);
+
+      for (let i = 0; i < Math.max(nivelA.length, nivelB.length); i++) {
+        const valA = nivelA[i] ?? 0;
+        const valB = nivelB[i] ?? 0;
+        if (valA !== valB) return valA - valB;
+      }
+
+      return 0;
+    });
+  }
+
+
   iniciarAdicionarEtapa() {
     // Pega os níveis que são somente raiz (sem ponto)
     const niveisRaiz = this.orcamento.itens
@@ -83,35 +105,41 @@ export class Detalhesorcamento implements OnInit{
   }
 
 
-  iniciarAdicionar(tipo: | 'subetapa' | 'composicao' | 'insumo', parent?: ItemOrcamento) {
+  iniciarAdicionar(tipo: 'subetapa' | 'composicao' | 'insumo', parent?: ItemOrcamento) {
     let nivel: string;
 
     if (parent) {
-      const partes = parent.nivel.toString().split('.').map(n => parseInt(n, 10));
+      this.selectedItem = parent;
+      const parentNivel = parent.nivel.toString();
+      const parentNivelParts = parentNivel.split('.');
+      const parentDepth = parentNivelParts.length;
 
       if (tipo === 'subetapa') {
-        partes.push(1);
-        nivel = partes.join('.');
+        // Sempre adiciona um novo nível abaixo do parent
+        nivel = `${parentNivel}.1`;
       } else {
-        const parentPrefix = parent.nivel.toString().split('.').slice(0, -1).join('.');
-        const parentUltimoNivel = parseInt(parent.nivel.toString().split('.').slice(-1)[0], 10);
-
-        const irmãosMesmoNivel = this.orcamento.itens.filter(i => {
-          const nivelStr = i.nivel.toString();
-          const prefix = nivelStr.split('.').slice(0, -1).join('.');
-          return prefix === parentPrefix;
+        // Adiciona como próximo filho direto (não subetapa) do parent
+        const filhosDiretos = this.orcamento.itens.filter(i => {
+          const nivelParts = i.nivel.toString().split('.');
+          return nivelParts.length === parentDepth + 1 &&
+            i.nivel.toString().startsWith(parentNivel + '.');
         });
 
-        const maioresNumeros = irmãosMesmoNivel.map(i => parseInt(i.nivel.toString().split('.').slice(-1)[0], 10));
-        const proximo = Math.max(...maioresNumeros, parentUltimoNivel) + 1;
+        const ultimosNumeros = filhosDiretos.map(i => {
+          const partes = i.nivel.toString().split('.');
+          return parseInt(partes[partes.length - 1], 10);
+        });
 
-        nivel = parentPrefix ? `${parentPrefix}.${proximo}` : `${proximo}`;
+        const proximo = ultimosNumeros.length > 0 ? Math.max(...ultimosNumeros) + 1 : 1;
+        nivel = `${parentNivel}.${proximo}`;
       }
     } else {
+      // Adicionando etapa raiz (nível "1", "2", etc)
       const niveisRaiz = this.orcamento.itens
         .map(i => i.nivel.toString())
         .filter(n => !n.includes('.'))
         .map(n => parseInt(n, 10));
+
       const max = Math.max(0, ...niveisRaiz);
       nivel = (max + 1).toString();
     }
@@ -130,6 +158,7 @@ export class Detalhesorcamento implements OnInit{
       buscaDescricao: ''
     };
   }
+
 
   onBuscarRealTime() {
     const codigo = this.editandoItem.buscaCodigo?.trim();
@@ -169,19 +198,91 @@ export class Detalhesorcamento implements OnInit{
 
     const usarDesonerado = this.editandoItem.item.usarPrecoDesonerado ?? true;
 
-    Object.assign(this.editandoItem.item, {
-      codigo: res.codigo,
-      descricao: this.editandoItem.tipo === 'composicao' ? (res as any).descricao : res.nome,
-      unidade: res.unidadeMedida,
-      precoUnitario: usarDesonerado
-        ? (res as any).precoDesonerado
-        : (res as any).precoNaoDesonerado
-    });
+    const tipo = this.editandoItem.tipo;
 
+    this.editandoItem.item = {
+      ...this.editandoItem.item,
+      codigo: res.codigo,
+      descricao: tipo === 'composicao' ? (res as Composicao).nome : (res as Insumo).nome,
+      unidade: res.unidadeMedida,
+      precoDesonerado: (res as any).precoDesonerado,
+      precoNaoDesonerado: (res as any).precoNaoDesonerado,
+      quantidade: this.editandoItem.item.quantidade ?? 1,
+      tipo: tipo,
+      base: this.getTipoBanco()
+    };
+
+    // Limpar busca
     this.editandoItem.resultados = [];
     this.editandoItem.buscaCodigo = '';
     this.editandoItem.buscaDescricao = '';
   }
+
+
+  isUltimoFilhoDireto(i: ItemOrcamento): boolean {
+    if (!this.selectedItem) return false;
+
+    const parentNivel = this.selectedItem.nivel.toString();
+    const nivelAtual = i.nivel.toString();
+
+    const isFilhoDireto = nivelAtual.startsWith(parentNivel + '.') &&
+      nivelAtual.split('.').length === parentNivel.split('.').length + 1;
+
+    if (isFilhoDireto) {
+      const filhos = this.itensOrdenados.filter(it => {
+        const n = it.nivel.toString();
+        return n.startsWith(parentNivel + '.') &&
+          n.split('.').length === parentNivel.split('.').length + 1;
+      });
+
+      return filhos[filhos.length - 1]?.nivel.toString() === i.nivel.toString();
+    }
+
+    // Caso o item seja o próprio pai e ele não tenha filhos
+    const isSelectedItem = nivelAtual === parentNivel;
+
+    const hasFilhos = this.itensOrdenados.some(el => {
+      const n = el.nivel.toString();
+      return n.startsWith(parentNivel + '.') &&
+        n.split('.').length === parentNivel.split('.').length + 1;
+    });
+
+    return isSelectedItem && !hasFilhos;
+  }
+
+/**
+  shouldMostrarLinhaEdicao(i: ItemOrcamento): boolean {
+    if (!this.editandoItem || !this.selectedItem) return false;
+
+    const selectedNivel = this.selectedItem.nivel.toString();
+    const currentNivel = i.nivel.toString();
+
+    const isFilhoDireto = currentNivel.startsWith(selectedNivel + '.') &&
+      currentNivel.split('.').length === selectedNivel.split('.').length + 1;
+
+    if (isFilhoDireto) {
+      const filhosDiretos = this.itensOrdenados.filter(el => {
+        const n = el.nivel.toString();
+        return n.startsWith(selectedNivel + '.') &&
+          n.split('.').length === selectedNivel.split('.').length + 1;
+      });
+
+      return filhosDiretos[filhosDiretos.length - 1]?.nivel.toString() === currentNivel;
+    }
+
+    // Se o item atual é o próprio item selecionado e ele não tem filhos
+    const hasFilhos = this.itensOrdenados.some(el => {
+      const n = el.nivel.toString();
+      return n.startsWith(selectedNivel + '.') &&
+        n.split('.').length === selectedNivel.split('.').length + 1;
+    });
+
+    return !hasFilhos && selectedNivel === currentNivel;
+  }
+*/
+
+
+
 
   iniciarNovaSubetapa(parent: ItemOrcamento) {
     const parentNivel = parent.nivel.toString();
@@ -244,43 +345,60 @@ export class Detalhesorcamento implements OnInit{
     };
   }
 
+
+  recalcularEncargos(novoEncargo: 'desonerado' | 'nao-desonerado') {
+    this.orcamento.encargosSociais = novoEncargo;
+    this.orcamento = this.calculate(this.orcamento);
+  }
+
+
   private calculate(o: OrcamentoDetalhes): OrcamentoDetalhes {
     const bdiPercent = o.bdi ?? 0;
+    const usarDesonerado = o.encargosSociais === 'desonerado';
 
+    // Atualiza os valores dos itens
     o.itens = o.itens.map(i => {
-      const preco = i.precoUnitario ?? 0;
+      console.log(`Item ${i.id} | precoDesonerado: ${i.precoDesonerado} | precoNaoDesonerado: ${i.precoNaoDesonerado} | precoUnitario original: ${i.precoUnitario}`);
+
+      const precoUnitario = usarDesonerado
+        ? i.precoDesonerado ?? i.precoUnitario ?? 0
+        : i.precoNaoDesonerado ?? i.precoUnitario ?? 0;
+      console.log(`Preco escolhido: ${precoUnitario}`);
+
       const quantidade = i.quantidade ?? 0;
 
-      const valorComBdi = preco + (preco * bdiPercent / 100);
+      const valorComBdi = precoUnitario + (precoUnitario * bdiPercent / 100);
       const total = valorComBdi * quantidade;
 
       return {
         ...i,
+        precoUnitario,
         valorComBdi,
         total
       };
     });
 
+    // Ordenar do mais profundo ao mais superficial
     const itensOrdenados = [...o.itens].sort((a, b) => {
       return b.nivel.toString().split('.').length - a.nivel.toString().split('.').length;
     });
 
-    for (let item of itensOrdenados) {
-      const itemNivel = item.nivel.toString();
-
-      const parentPath = itemNivel.split('.').slice(0, -1).join('.');
+    // Propagar total dos filhos para os pais
+    for (const item of itensOrdenados) {
+      const nivelAtual = item.nivel.toString();
+      const parentPath = nivelAtual.split('.').slice(0, -1).join('.');
       if (!parentPath) continue;
 
-      const parentItem = o.itens.find(i => i.nivel.toString() === parentPath);
-      if (parentItem) {
-        parentItem.total = (parentItem.total ?? 0) + (item.total ?? 0);
+      const parent = o.itens.find(i => i.nivel.toString() === parentPath);
+      if (parent) {
+        parent.total = (parent.total ?? 0) + (item.total ?? 0);
       }
     }
 
+    // Reordenar para exibição
     o.itens = o.itens.sort((a, b) => {
       const aNivel = a.nivel.toString().split('.').map(Number);
       const bNivel = b.nivel.toString().split('.').map(Number);
-
       for (let i = 0; i < Math.max(aNivel.length, bNivel.length); i++) {
         const aVal = aNivel[i] ?? 0;
         const bVal = bNivel[i] ?? 0;
@@ -289,7 +407,25 @@ export class Detalhesorcamento implements OnInit{
       return 0;
     });
 
-    return o;
+    const etapas = o.itens.filter(i => i.tipo === 'etapa');
+    const soltos = o.itens.filter(i =>
+      !i.nivel.toString().includes('.') && i.tipo !== 'etapa'
+    );
+
+
+
+    const totalComBDI = [...etapas, ...soltos].reduce((acc, i) => acc + (i.total ?? 0), 0);
+    const totalSemBDI = bdiPercent > 0 ? totalComBDI / (1 + bdiPercent / 100) : totalComBDI;
+
+    this.totalSemBDI = totalSemBDI;
+    this.totalComBDI = totalComBDI;
+    this.totalFinal = totalComBDI;
+
+    o.totalSemBDI = totalSemBDI;
+    o.totalComBDI = totalComBDI;
+    o.totalFinal = totalComBDI;
+
+    return { ...o };
   }
 
 

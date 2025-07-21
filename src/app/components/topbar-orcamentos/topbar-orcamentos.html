@@ -1,11 +1,74 @@
+
 <div class="topbar">
-  <div class="topbar">
-  </div>
-  <a [routerLink]="['/criarpasta']" >
+  <a (click)="abrirModalCriarPasta()">
     <i class='bx bx-folder'></i>
   </a>
-  <a [routerLink]="['/orcamento'] ">
-    <i class='bx bx-dollar	'></i>
+  <a (click)="abrirModal()">
+    <i class='bx bx-dollar'></i>
   </a>
 </div>
 
+<form [formGroup]="orcamentoForm">
+  <div class="modal-overlay" *ngIf="modalAberto" (click)="fecharModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h1>Criar Orçamento</h1>
+
+      <label for="nomeOrcamento">Nome do Orçamento</label>
+      <input type="text" id="nomeOrcamento" formControlName="nomeOrcamento" placeholder="Digite o nome do orçamento" />
+
+      <label for="bdi">BDI</label>
+      <input id="bdi" type="number"formControlName="bdi" placeholder="Digite o BDI" />
+
+      <label>Selecione os Bancos e Período</label>
+      <div class="banco">
+        <button class="btn-selecionar-banco" (click)="abrirSelecionarBanco()">
+          Selecionar Banco
+        </button>
+      </div>
+
+      <label>Encargos Sociais</label>
+      <div class="radio-group">
+        <label>
+          <input type="radio" formControlName="encargo" value="desonerado" /> Desonerado
+        </label>
+        <label>
+          <input type="radio" formControlName="encargo" value="nao-desonerado" /> Não Desonerado
+        </label>
+      </div>
+
+      <div class="actions">
+        <button class="btn-criar" (click)="adicionarOrcamento()">Criar Orçamento</button>
+        <button class="btn-fechar" (click)="fecharModal()">Fechar</button>
+      </div>
+    </div>
+  </div>
+</form>
+
+
+
+
+<!-- Modal Criar Nova Pasta -->
+<div class="modal-overlay" *ngIf="modalCriarPastaAberto">
+  <div class="container" (click)="$event.stopPropagation()">
+    <h2>Criar nova pasta</h2>
+
+    <input
+      type="text"
+      placeholder="Digite o nome da nova pasta"
+      [(ngModel)]="nomePasta"
+      class="input-folder"
+    />
+
+    <button
+      (click)="criarPasta()"
+      [disabled]="!nomePasta?.trim()"
+      class="btn-create"
+    >
+      Criar nova pasta
+    </button>
+
+    <button (click)="fecharModalCriarPasta()" class="btn-cancel">
+      Cancelar
+    </button>
+  </div>
+</div>

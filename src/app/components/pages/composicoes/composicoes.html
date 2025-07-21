@@ -1,5 +1,5 @@
 <app-topbar-listacomp></app-topbar-listacomp>
-
+<app-sidebar></app-sidebar>
 
 <div class="search-form">
   <label>Pesquisar por:</label>
@@ -37,7 +37,7 @@
   </tr>
   </thead>
   <tbody>
-  <tr *ngFor="let item of resultados" (click)="abrirDetalhes(item.codigo)">
+  <tr *ngFor="let item of resultados" (click)="abrirDetalhes(item.id)">
     <td>{{ item.base }}</td>
     <td>{{ item.data }}</td>
     <td>{{ item.codigo }}</td>

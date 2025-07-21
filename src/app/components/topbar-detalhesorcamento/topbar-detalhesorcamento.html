@@ -1,11 +1,137 @@
+
 <div class="topbar">
-  <a [routerLink]="['/eventograma', orcamentoId]">
-    <i class='bx bx-show'></i>
+  <a *ngIf= "isOrcamento" [routerLink]="['/detalhes-orcamento', orcamentoId]">
+    <i class='bx bx-dollar'></i>
   </a>
-  <a [routerLink]="['/ferramentas'] ">
-    <i class='bx bx-wrench'></i>
-  </a>
-    <a [routerLink]="['/editar'] ">
-      <i class='bx bx-edit'></i>
+  <div class="menu-eventograma-wrapper">
+    <a (click)="menuEventogramaAberto = !menuEventogramaAberto">
+      <i class='bx bx-show'></i>
     </a>
+    <div class="menu-eventograma" *ngIf="menuEventogramaAberto" (click)="$event.stopPropagation()">
+      <a [routerLink]="['/eventograma', orcamentoId]" (click)="menuEventogramaAberto = false">
+        Eventograma
+      </a>
+      <a [routerLink]="['/cronograma', orcamentoId]" (click)="menuEventogramaAberto = false">
+        Cronograma
+      </a>
+    </div>
+  </div>
+  <div class="menu-eventograma-wrapper">
+    <a (click)="menuFerramentasAberto = !menuFerramentasAberto">
+      <i class='bx bx-wrench'></i>
+    </a>
+    <div class="menu-eventograma" *ngIf="menuFerramentasAberto" (click)="$event.stopPropagation()">
+      <a (click)="abrirModalImportar(); menuFerramentasAberto = false">Importar Orçamento</a>
+      <a (click)="abrirModal(); menuFerramentasAberto = false">Exportar Transfere Gov</a>
+    </div>
+  </div>
+
+  <a (click)="abrirModalBanco()">
+    <i class='bx bx-edit'></i>
+  </a>
+</div>
+
+
+<div class="menu-overlay" *ngIf="menuAberto" (click)="fecharMenu()">
+  <div class="menu-container" (click)="$event.stopPropagation()">
+    <div class="menu-header"></div>
+    <div class="menu-actions">
+      <button class="menu-btn" (click)="importarOrcamento()">📥 Importar Orçamento</button>
+      <button class="menu-btn" (click)="abrirModal()">📤 Exportar para o Transfere Gov</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="modalImportarAberto" (click)="fecharModalImportar()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h2>Importar Orçamento</h2>
+    <form>
+      <div class="form-group">
+        <label for="primeiroItem">Primeiro Item do Orçamento:</label>
+        <input type="text" id="primeiroItem" [(ngModel)]="primeiroItem" name="primeiroItem" />
+      </div>
+      <div class="form-group">
+        <label for="ultimoItem">Último Item do Orçamento:</label>
+        <input type="text" id="ultimoItem" [(ngModel)]="ultimoItem" name="ultimoItem" />
+      </div>
+      <div class="modal-buttons">
+        <button type="button" class="btn-exportar" (click)="confirmarImportacao()">Importar</button>
+        <button type="button" class="btn-cancelar" (click)="fecharModalImportar()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<button class="menu-btn" (click)="abrirModal()">📤 Exportar para o Transfere Gov</button>
+<div class="modal-overlay" *ngIf="modalAberto" (click)="fecharModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <h2>Exportar para o Transfere Gov</h2>
+    <form>
+      <div class="form-group">
+        <label for="anoProposta">Ano da Proposta:</label>
+        <input type="number" id="anoProposta" [(ngModel)]="anoProposta" name="anoProposta" />
+      </div>
+      <div class="form-group">
+        <label for="numeroMeta">Número da Meta:</label>
+        <input type="text" id="numeroMeta" [(ngModel)]="numeroMeta" name="numeroMeta" />
+      </div>
+      <div class="form-group">
+        <label for="numeroSubmeta">Número da Submeta:</label>
+        <input type="text" id="numeroSubmeta" [(ngModel)]="numeroSubmeta" name="numeroSubmeta" />
+      </div>
+      <div class="modal-buttons">
+        <button type="button" class="btn-exportar" (click)="exportarParaTransfereGov()">Exportar</button>
+        <button type="button" class="btn-cancelar" (click)="fecharModal()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<button (click)="abrirModalBanco()">Adicionar Banco</button>
+
+<div class="modal-overlay" *ngIf="modalBancoAberto" (click)="fecharModalBanco()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Encargos e Banco</h2>
+    </div>
+
+    <div class="modal-body">
+      <label>Nome:</label>
+      <input type="text" [(ngModel)]="nome" />
+
+      <label>Encargos Sociais:</label>
+      <div>
+        <input type="radio" name="encargos" value="desonerado" [(ngModel)]="encargos" (ngModelChange)="onEncargoChange($event)" /> Desonerado
+        <input type="radio" name="encargos" value="nao-desonerado" [(ngModel)]="encargos" (ngModelChange)="onEncargoChange($event)"/> Não desonerado
+      </div>
+
+      <label>BDI:</label>
+      <input type="text" [(ngModel)]="bdi" />
+
+      <label>Selecione os bancos e períodos:</label>
+      <select [(ngModel)]="nomeBanco">
+        <option *ngFor="let banco of bancosDisponiveis" [value]="banco">{{ banco }}</option>
+      </select>
+
+      <select [(ngModel)]="periodoBanco">
+        <option *ngFor="let periodo of periodosDisponiveis" [value]="periodo">{{ periodo }}</option>
+      </select>
+
+      <button (click)="adicionarBanco()">Adicionar Banco</button>
+
+
+      <div class="bancos-listados">
+        <div *ngFor="let banco of bancos; let i = index" class="banco-item">
+          <span>{{ banco.nome }} - {{ banco.periodo }}</span>
+          <button class="remover-btn" (click)="removerBanco(i)">Remover</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button (click)="salvar()">Salvar</button>
+      <button (click)="fecharModalBanco()">Cancelar</button>
+    </div>
+  </div>
 </div>

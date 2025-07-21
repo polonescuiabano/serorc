@@ -1,0 +1,104 @@
+.cabecalho-orcamento {
+  display: flex;
+  justify-content: center;     /* Centraliza horizontalmente */
+  align-items: center;         /* Alinha verticalmente */
+  gap: 20px;                   /* Espaço entre o título e botão */
+  margin-top: 150px;
+}
+
+.teste{
+
+  margin-top: 12px;
+  margin-left: 500px;
+  font-weight: bold;
+}
+
+
+h2 {
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+button {
+  margin-right: 10px;
+  padding: 6px 12px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease-in-out;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+table {
+  width: 84%;
+  margin-left: 300px;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: white;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+  font-weight: bold;
+
+}
+
+thead {
+  background-color: var(--sidebar-color);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  color: var(--text-color);
+}
+
+input[type="text"], input[type="number"], select {
+  width: 100%;
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+input[type="text"]:focus, input[type="number"]:focus, select:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+li:hover {
+  background-color: #f0f0f0;
+}
+
+
+
+
+@media screen and (max-width: 768px) {
+  .espacamento-topo {
+    margin-left: 0;
+    margin-top: 120px; /* ajuste maior da topbar mobile */
+    padding: 15px;
+  }
+
+  table, thead, tbody, th, td, tr {
+    font-size: 12px;
+  }
+
+  button {
+    font-size: 12px;
+    padding: 5px 8px;
+  }
+}

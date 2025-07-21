@@ -4,11 +4,14 @@ import { Eventograma, Evento, FrenteDeObra } from '../../../services/eventograma
 import {DetalhesorcamentoService, ItemOrcamento, OrcamentoDetalhes} from '../../../services/detalhesorcamento';
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {CurrencyPipe, NgForOf, NgIf} from '@angular/common';
+import {Sidebar} from '../../sidebar/sidebar';
+import {TopbarOrcamentos} from '../../topbar-orcamentos/topbar-orcamentos';
+import {TopbarDetalhesorcamento} from '../../topbar-detalhesorcamento/topbar-detalhesorcamento';
 
 @Component({
   selector: 'app-eventograma',
   templateUrl: './eventograma.html',
-  imports: [FormsModule, ReactiveFormsModule, CurrencyPipe, NgForOf, NgIf],
+  imports: [FormsModule, ReactiveFormsModule, CurrencyPipe, NgForOf, NgIf, Sidebar, TopbarOrcamentos, TopbarDetalhesorcamento],
   styleUrls: ['./eventograma.css']
 })
 export class EventogramaComponent implements OnInit {
@@ -63,7 +66,7 @@ export class EventogramaComponent implements OnInit {
 
   initForms() {
     this.novoEventoForm = this.fb.group({
-      id: [''],
+      _id: [''],
       numero: [''],
       nome: ['']
     });
@@ -152,34 +155,37 @@ export class EventogramaComponent implements OnInit {
     return timestamp + random;
   }
 
-
-
   adicionarEvento() {
     const { numero, nome } = this.novoEventoForm.value;
     if (!nome || !numero) return;
 
+    const numeroExiste = this.eventos.some(ev =>
+      ev.numero?.trim() === numero.trim()
+    );
+    if (numeroExiste) {
+      alert('Já existe um evento com esse número.');
+      return;
+    }
+
     const novoEvento = {
       _id: this.generateObjectId(),
-      nome,
-      numero
+      nome: nome.trim(),
+      numero: numero.trim()
     };
 
-    console.log(novoEvento);
-
-    this.svc.adicionarEvento(this.orcamentoId, novoEvento)
-      .subscribe({
-        next: () => {
-          this.loadDados(this.orcamentoId);
-          this.novoEventoForm.reset();
-        },
-        error: err => console.error('Erro ao adicionar evento:', err)
-      });
+    this.svc.adicionarEvento(this.orcamentoId, novoEvento).subscribe({
+      next: () => {
+        this.loadDados(this.orcamentoId);
+        this.novoEventoForm.reset();
+      },
+      error: err => console.error('Erro ao adicionar evento:', err)
+    });
   }
 
   editarEvento(evento: Evento) {
-    this.editEventoId = evento._id!;
+    this.editEventoId = evento._id?.toString() ?? null;
     this.novoEventoForm.setValue({
-      id: evento._id ?? '',
+      _id: evento._id ?? '',
       nome: evento.nome,
       numero: evento.numero ?? ''
     });
@@ -187,12 +193,49 @@ export class EventogramaComponent implements OnInit {
 
   salvarEdicaoEvento() {
     if (!this.editEventoId) return;
+
     const { nome, numero } = this.novoEventoForm.value;
-    this.svc.editarEvento(this.orcamentoId, this.editEventoId, { nome, numero }).subscribe(() => {
+    const numeroTrim = numero.trim();
+    const nomeTrim = nome.trim();
+
+    const numeroDuplicado = this.eventos
+      .filter(ev => ev._id && ev.numero)
+      .some(ev =>
+        ev._id!.toString() !== this.editEventoId &&
+        ev.numero.trim() === numeroTrim
+      );
+
+
+    console.log('Editando evento ID:', this.editEventoId);
+    this.eventos.forEach(ev => {
+      console.log(`Evento: ${ev._id} - ${ev.numero}`, ev._id === this.editEventoId);
+    });
+
+    if (numeroDuplicado) {
+      alert('Já existe um evento com esse número.');
+      return;
+    }
+
+    console.log('Salvar edição:', {
+      _id: this.editEventoId,
+      nome: nomeTrim,
+      numero: numeroTrim
+    });
+
+    this.svc.editarEvento(this.orcamentoId, this.editEventoId, {
+      _id: this.editEventoId,
+      nome: nomeTrim,
+      numero: numeroTrim
+    }).subscribe(() => {
       this.editEventoId = null;
       this.novoEventoForm.reset();
       this.loadDados(this.orcamentoId);
     });
+  }
+
+  cancelarEdicaoEvento() {
+    this.editEventoId = null;
+    this.novoEventoForm.reset();
   }
 
   excluirEvento(eventoId: string) {
@@ -204,19 +247,26 @@ export class EventogramaComponent implements OnInit {
     const { nome } = this.novaFrenteForm.value;
     if (!nome) return;
 
+    const nomeExiste = this.frentes.some(fr =>
+      fr.nome.trim().toLowerCase() === nome.trim().toLowerCase()
+    );
+    if (nomeExiste) {
+      alert('Já existe uma frente de obra com esse nome.');
+      return;
+    }
+
     const novaFrente = {
       _id: this.generateObjectId(),
-      nome
+      nome: nome.trim()
     };
 
-    this.svc.adicionarFrente(this.orcamentoId, novaFrente)
-      .subscribe({
-        next: () => {
-          this.loadDados(this.orcamentoId);
-          this.novaFrenteForm.reset();
-        },
-        error: err => console.error('Erro ao adicionar frente:', err)
-      });
+    this.svc.adicionarFrente(this.orcamentoId, novaFrente).subscribe({
+      next: () => {
+        this.loadDados(this.orcamentoId);
+        this.novaFrenteForm.reset();
+      },
+      error: err => console.error('Erro ao adicionar frente:', err)
+    });
   }
 
   editarFrente(frente: FrenteDeObra) {
@@ -229,8 +279,22 @@ export class EventogramaComponent implements OnInit {
 
   salvarEdicaoFrente() {
     if (!this.editFrenteId) return;
-    const { nome} = this.novaFrenteForm.value;
-    this.svc.editarFrente(this.orcamentoId, this.editFrenteId, {  nome }).subscribe(() => {
+
+    const { nome } = this.novaFrenteForm.value;
+    const nomeTrim = nome.trim().toLowerCase();
+
+    const nomeDuplicado = this.frentes.some(fr =>
+      fr._id !== this.editFrenteId &&
+      fr.nome.trim().toLowerCase() === nomeTrim
+    );
+    if (nomeDuplicado) {
+      alert('Já existe uma frente de obra com esse nome.');
+      return;
+    }
+
+    this.svc.editarFrente(this.orcamentoId, this.editFrenteId, {
+      nome: nome.trim()
+    }).subscribe(() => {
       this.editFrenteId = null;
       this.novaFrenteForm.reset();
       this.loadDados(this.orcamentoId);

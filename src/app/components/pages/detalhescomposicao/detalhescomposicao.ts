@@ -5,11 +5,13 @@ import { InsumosService, Insumo } from '../../../services/insumos';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
+import { TopbarListacomp } from '../../topbar-listacomp/topbar-listacomp';
+import { Sidebar } from '../../sidebar/sidebar';
 
 @Component({
   selector: 'app-detalhescomposicao',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TopbarListacomp, Sidebar],
   templateUrl: './detalhescomposicao.html',
   styleUrls: ['./detalhescomposicao.css']
 })

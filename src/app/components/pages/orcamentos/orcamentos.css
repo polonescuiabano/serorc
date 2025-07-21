@@ -1,9 +1,77 @@
 h2{
   margin-top: 150px;
   margin-left: 350px;
+  color: var(--sidebar-color);
 }
 
 .orcamentos{
   margin-left: 350px;
 }
 
+
+/* Lista geral */
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto 40px auto;
+  max-width: 800px;
+}
+
+/* Itens da lista com visual tipo card */
+ul li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+  padding: 14px 20px;
+  margin-bottom: 15px;
+  font-size: 16px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+
+/* Nome do item clicável */
+ul li span {
+  flex-grow: 1;
+  margin-left: 10px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #333;
+  transition: color 0.2s;
+}
+
+ul li span:hover {
+  color: #007bff;
+}
+
+/* Ícone (📁, 📄) integrado ao início do span */
+ul li span::before {
+  content: '📁';
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+/* Para orçamentos (📄), aplique uma classe ou estilo diferente */
+ul.orcamentos li span::before {
+  content: '📄';
+}
+
+/* Botão de excluir com visual mais leve */
+ul li button {
+  background-color: transparent;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+ul li button:hover {
+  background-color: #dc3545;
+  color: white;
+}

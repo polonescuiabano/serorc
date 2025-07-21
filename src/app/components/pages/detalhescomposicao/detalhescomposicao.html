@@ -1,10 +1,9 @@
-<!-- Botões para iniciar adicionar insumo ou composição auxiliar -->
-<button *ngIf="isProprio" (click)="iniciarAdicionar('insumo')">Adicionar Insumo</button>
-<button *ngIf="isProprio" (click)="iniciarAdicionar('composicao')">Adicionar Composição Auxiliar</button>
-
+<app-sidebar></app-sidebar>
+<app-topbar-listacomp></app-topbar-listacomp>
 
 <!-- Lista de Insumos -->
-<h3>Insumos</h3>
+
+<button *ngIf="isProprio" (click)="iniciarAdicionar('insumo')">Adicionar Insumo</button>
 <ul *ngIf="composicao?.insumos?.length > 0; else semInsumos">
   <li *ngFor="let insumo of composicao.insumos">
     Código: {{ insumo.insumoId }} - Coeficiente: {{ insumo.coeficiente }}
@@ -15,7 +14,8 @@
 </ng-template>
 
 <!-- Lista de Composições Auxiliares -->
-<h3>Composições Auxiliares</h3>
+
+<button *ngIf="isProprio" (click)="iniciarAdicionar('composicao')">Adicionar Composição Auxiliar</button>
 <ul *ngIf="composicao?.composicoesAuxiliares?.length > 0; else semCompsAux">
   <li *ngFor="let compAux of composicao.composicoesAuxiliares">
     Código: {{ compAux.codigo }} - Coeficiente: {{ compAux.coeficiente }}

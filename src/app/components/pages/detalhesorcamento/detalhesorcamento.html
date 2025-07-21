@@ -1,98 +1,116 @@
-<h2>Detalhes: {{orcamento?.nome}}</h2>
-<button (click)="iniciarAdicionarEtapa()">+ Etapa</button>
+<app-topbar-detalhesorcamento
+  [orcamento]="orcamento"
+  (encargosAlterados)="recalcularEncargos($event)">
+</app-topbar-detalhesorcamento>
+<app-sidebar></app-sidebar>
 
-<tr *ngIf="novaEtapa">
-  <td><input type="text" [(ngModel)]="novaEtapa.nivel" readonly /></td>
-  <td></td>
-  <td>etapa</td>
-  <td><input type="text" [(ngModel)]="novaEtapa.descricao" placeholder="Descrição" /></td>
-  <td></td>
-  <td><input type="number" [(ngModel)]="novaEtapa.quantidade" /></td>
-  <td></td><td></td><td></td>
-  <td>
-    <button (click)="confirmarNovaEtapa()">✔</button>
-    <button (click)="cancelarNovaEtapa()">✖</button>
-  </td>
-</tr>
+<!-- Cabeçalho do orçamento -->
+<div class="cabecalho-orcamento">
+  <h2>Detalhes: {{ orcamento?.nome }}</h2>
+  <button (click)="iniciarAdicionarEtapa()">+ Etapa</button>
+</div>
 
-
-
-<table *ngIf="orcamento && orcamento.itens?.length">
+<table *ngIf="orcamento && orcamento.itens?.length" class="tabela-itens">
   <thead>
   <tr>
     <th>Nível</th><th>Código</th><th>Tipo</th><th>Descrição</th>
     <th>Unidade</th><th>Qtd</th><th>Valor U.</th>
-    <th>BDI</th><th>Total</th><th>Ações</th>
+    <th>Valor c/ BDI</th><th>Total</th><th>Ações</th>
   </tr>
   </thead>
   <tbody>
+  <ng-container *ngFor="let i of itensOrdenados">
+    <!-- Linha principal do item -->
+    <tr (click)="onSelectItem(i)">
+      <td>{{ i.nivel }}</td>
+      <td>{{ i.codigo }}</td>
+      <td>{{ i.tipo }}</td>
+      <td>{{ i.descricao }}</td>
+      <td>{{ i.unidade }}</td>
+      <td>{{ i.quantidade }}</td>
+      <td>{{ i.precoUnitario | currency }}</td>
+      <td>{{ i.valorComBdi | currency }}</td>
+      <td>{{ i.total | currency }}</td>
+      <td>
+        <button (click)="excluir(i.id); $event.stopPropagation()">🗑️</button>
+        <button *ngIf="i.tipo === 'etapa' || i.tipo === 'subetapa'"
+                (click)="iniciarNovaEtapa(); $event.stopPropagation()">✏️</button>
+      </td>
+    </tr>
 
+    <!-- Linha com botões de ação (logo após o item selecionado) -->
+    <tr *ngIf="selectedItem?.nivel === i.nivel" class="acoes-item-selecionado">
+      <td colspan="10">
+        <button (click)="iniciarAdicionarEtapa()">+ Etapa</button>
+        <button (click)="iniciarNovaSubetapa(selectedItem!)">+ Subetapa</button>
+        <button (click)="iniciarAdicionar('composicao', selectedItem)">+ Composição</button>
+        <button (click)="iniciarAdicionar('insumo', selectedItem)">+ Insumo</button>
+      </td>
+    </tr>
 
+    <!-- Linha de edição (inserida abaixo do último filho direto ou abaixo do pai se não há filhos) -->
+    <tr *ngIf="editandoItem && selectedItem && isUltimoFilhoDireto(i)" class="linha-edicao">
+      <td><input type="text" [(ngModel)]="editandoItem.item.nivel" placeholder="Nível" /></td>
 
+      <td>
+        <input [(ngModel)]="editandoItem.buscaCodigo" placeholder="Código"
+               (ngModelChange)="onBuscarRealTime()" />
+      </td>
 
-    <!-- Linha de edição/inserção -->
-  <tr *ngIf="editandoItem">
-    <td><input type="number" [(ngModel)]="editandoItem.item.nivel" /></td>
-    <input [(ngModel)]="editandoItem.buscaCodigo" placeholder="Código"
-           (ngModelChange)="onBuscarRealTime()" />
-    <td>{{ editandoItem.tipo }}</td>
-    <td>
-      <!-- Campo de busca por código -->
+      <td>{{ editandoItem.tipo }}</td>
 
+      <td>
+        <input [(ngModel)]="editandoItem.buscaDescricao" placeholder="Descrição"
+               (ngModelChange)="onBuscarRealTime()" />
+        <div *ngIf="editandoItem.resultados?.length" class="resultados-busca">
+          <ul>
+            <li *ngFor="let r of editandoItem.resultados"
+                (click)="selecionar(r)">
+              {{ r.codigo }} - {{ editandoItem.tipo === 'composicao' ? r.descricao : r.nome }}
+            </li>
+          </ul>
+        </div>
+      </td>
 
-      <!-- Campo de busca por descrição -->
-      <input [(ngModel)]="editandoItem.buscaDescricao" placeholder="Descrição"
-             (ngModelChange)="onBuscarRealTime()" />
+      <td>
+        <select [(ngModel)]="editandoItem.item.base">
+          <option *ngFor="let b of orcamento?.bancos" [value]="b.nome + ' ' + b.periodo">
+            {{ b.nome }} {{ b.periodo }}
+          </option>
+        </select>
+      </td>
 
-      <!-- Resultados da busca -->
-      <div *ngIf="editandoItem.resultados?.length"
-           style="border: 1px solid #ccc; margin-top: 0.5rem; max-height: 200px; overflow-y: auto;">
-        <ul style="list-style: none; padding: 0; margin: 0;">
-          <li *ngFor="let r of editandoItem.resultados"
-              (click)="selecionar(r)"
-              style="cursor: pointer; padding: 4px;">
-            {{ r.codigo }} - {{ editandoItem.tipo === 'composicao' ? r.descricao : r.nome }}
-          </li>
-        </ul>
-      </div>
-    </td>
-    <td>
-      <select [(ngModel)]="editandoItem.item.base">
-        <option *ngFor="let b of orcamento?.bancos" [value]="b.nome + ' ' + b.periodo">
-          {{ b.nome }} {{ b.periodo }}
-        </option>
-      </select>
-    </td>
-    <td><input type="number" [(ngModel)]="editandoItem.item.quantidade" /></td>
-    <td>{{ editandoItem.item.precoUnitario | currency }}</td>
-    <td>{{ (editandoItem.item?.precoUnitario ?? 0) * (1 + (orcamento?.bdi ?? 0)/100) | currency }}</td>
-    <td>{{ ((editandoItem.item?.precoUnitario ?? 0) * (1 + (orcamento?.bdi ?? 0)/100)) * (editandoItem.item?.quantidade ?? 0) | currency }}</td>
-    <td>
-      <button (click)="confirmarEdicao()">✔</button>
-      <button (click)="cancelarEdicao()">✖</button>
-    </td>
-  </tr>
+      <td><input type="number" [(ngModel)]="editandoItem.item.quantidade" placeholder="Qtd" /></td>
 
-  <!-- Itens do orçamento -->
-  <tr *ngFor="let i of orcamento.itens" (click)="onSelectItem(i)">
-    <td>{{i.nivel}}</td><td>{{i.codigo}}</td><td>{{i.tipo}}</td><td>{{i.descricao}}</td>
-    <td>{{i.unidade}}</td><td>{{i.quantidade}}</td>
-    <td>{{i.precoUnitario | currency}}</td><td>{{i.valorComBdi | currency}}</td>
-    <td>{{i.total | currency}}</td>
-    <td>
-      <button (click)="excluir(i.id); $event.stopPropagation()">Excluir</button>
-      <button *ngIf="i.tipo === 'etapa' || i.tipo === 'subetapa'" (click)="iniciarNovaEtapa(); $event.stopPropagation()">Editar</button>
-    </td>
-  </tr>
+      <td>{{ editandoItem.item.precoUnitario | currency }}</td>
+      <td>{{ (editandoItem.item?.precoUnitario ?? 0) * (1 + (orcamento?.bdi ?? 0)/100) | currency }}</td>
+      <td>{{ ((editandoItem.item?.precoUnitario ?? 0) * (1 + (orcamento?.bdi ?? 0)/100)) * (editandoItem.item?.quantidade ?? 0) | currency }}</td>
 
-  <!-- Ações do item selecionado -->
-  <tr *ngIf="selectedItem">
-    <td colspan="10">
-      <button (click)="selectedItem && iniciarNovaSubetapa(selectedItem)">+ Subetapa</button>
-      <button (click)="iniciarAdicionar('composicao', selectedItem)">+ Composição</button>
-      <button (click)="iniciarAdicionar('insumo', selectedItem)">+ Insumo</button>
-    </td>
-  </tr>
-
+      <td>
+        <button (click)="confirmarEdicao()">✔</button>
+        <button (click)="cancelarEdicao()">✖</button>
+      </td>
+    </tr>
+  </ng-container>
   </tbody>
 </table>
+
+<!-- Nova etapa (inserida fora da lista principal) -->
+<table *ngIf="novaEtapa" class="tabela-nova-etapa">
+  <tr>
+    <td><input type="text" [(ngModel)]="novaEtapa.nivel" placeholder="Nível" /></td>
+    <td>Etapa</td>
+    <td><input type="text" [(ngModel)]="novaEtapa.descricao" placeholder="Descrição" /></td>
+    <td><input type="number" [(ngModel)]="novaEtapa.quantidade" placeholder="Qtd" /></td>
+    <td>
+      <button (click)="confirmarNovaEtapa()">✔</button>
+      <button (click)="cancelarNovaEtapa()">✖</button>
+    </td>
+  </tr>
+</table>
+
+<div class="resumo-totais">
+  <p><strong>Total sem BDI:</strong> {{ orcamento?.totalSemBDI | currency:'BRL' }}</p>
+  <p><strong>Total com BDI:</strong> {{ orcamento?.totalComBDI | currency:'BRL' }}</p>
+  <p><strong>Total final:</strong> {{ orcamento?.totalFinal | currency:'BRL' }}</p>
+</div>

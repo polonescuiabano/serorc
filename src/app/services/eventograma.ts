@@ -79,7 +79,8 @@ export class Eventograma {
   // PUT
   // ============================
 
-  editarEvento(orcamentoId: string, eventoId: string, evento: { id?: string; nome: string; numero?: string }): Observable<any> {
+  editarEvento(orcamentoId: string, eventoId: string, evento: { _id?: string; nome: string; numero?: string }): Observable<any> {
+    console.log('Evento enviado para edição:', evento);
     return this.http.put(`${this.baseUrl}/orcamentos/${orcamentoId}/eventos/${eventoId}`, evento);
   }
 

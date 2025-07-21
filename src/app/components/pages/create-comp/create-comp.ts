@@ -4,11 +4,13 @@ import { ComposicoesService } from '../../../services/composicoes';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
 import {Router} from '@angular/router';
+import { Sidebar } from '../../sidebar/sidebar';
+import { TopbarListacomp } from '../../topbar-listacomp/topbar-listacomp';
 
 @Component({
   selector: 'app-create-comp',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, Sidebar, TopbarListacomp],
   templateUrl: './create-comp.html',
   styleUrls: ['./create-comp.css']
 })

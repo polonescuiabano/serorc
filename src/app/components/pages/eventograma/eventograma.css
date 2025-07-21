@@ -1,0 +1,115 @@
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fonte moderna e legível */
+  background-color: var(--sidebar-color); /* Cor de fundo suave */
+  margin: 0;
+  padding: 40px;
+  color: #333; /* Cor de texto padrão */
+  margin-left: 300px;
+}
+
+
+/* === Títulos das seções === */
+h2 {
+  color: #2c3e50; /* Cor escura para destaque */
+  margin-top: 100px;
+  margin-left: 400px;
+  font-weight: bold;
+  font-size: 24px;
+}
+
+/* === Containers dos formulários === */
+div {
+  margin: 20px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; /* Espaçamento entre os inputs e botões */
+}
+
+/* === Estilo dos inputs === */
+input[type="text"], select, input[type="number"] {
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc; /* Borda sutil */
+  border-radius: 5px; /* Cantos arredondados */
+  outline: none;
+  transition: border-color 0.3s;
+  background-color: white;
+}
+
+input[type="text"]:focus, select:focus, input[type="number"]:focus {
+  border-color: #3498db; /* Destaque ao focar */
+}
+
+/* === Estilo dos botões === */
+button {
+  padding: 8px 16px;
+  background-color: #3498db; /* Azul moderno */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+.frente{
+  margin-left: 300px;
+}
+
+button:hover {
+  background-color: #2980b9; /* Cor mais escura ao passar o mouse */
+}
+
+/* === Estilo das tabelas === */
+table {
+  width: 90%;
+  margin-left: 300px;
+  border-collapse: collapse;
+  margin-top: 10px;
+  background-color: white; /* Fundo branco para contraste */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Sombra suave */
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+/* === Cabeçalho da tabela === */
+table thead {
+  background-color: #ecf0f1; /* Cor de fundo clara no cabeçalho */
+}
+
+table th, table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd; /* Linha separadora sutil */
+  font-weight: bold;
+}
+
+/* === Última linha da tabela sem borda extra === */
+table tr:last-child td {
+  border-bottom: none;
+}
+
+/* === Alinhamento dos inputs das frentes === */
+table input[type="number"] {
+  text-align: center;
+  padding: 6px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+/* === Responsividade em telas menores === */
+@media (max-width: 768px) {
+  table {
+    font-size: 11px;
+  }
+
+  input[type="text"], select, input[type="number"], button {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  div {
+    flex-direction: column; /* Coloca os inputs empilhados */
+    gap: 8px;
+  }
+}
