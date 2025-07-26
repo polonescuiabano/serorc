@@ -18,6 +18,8 @@ import {CommonModule} from '@angular/common';
   styleUrl: './insumos.css'
 })
 export class Insumos {
+  mesSelecionado = '01';
+  anoSelecionado = '2025';
   query = '';
   searchBy = 'codigo';
   tipo = 'SINAPI';
@@ -32,8 +34,8 @@ export class Insumos {
       return;
     }
 
-    const periodoFormatado = this.periodo
-    ;
+    const periodoFormatado = `${this.mesSelecionado}-${this.anoSelecionado}`;
+
 
     if (this.searchBy === 'codigo') {
       this.insumosService.buscarPorCodigo(this.query, this.tipo, periodoFormatado).subscribe(data => {

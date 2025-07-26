@@ -13,6 +13,7 @@ import {TopbarOrcamentos} from '../../topbar-orcamentos/topbar-orcamentos';
   styleUrl: './orcamentos.css'
 })
 export class Orcamentos implements OnInit{
+  caminhoPastas: { id: string, nome: string }[] = [];
   usuarioId: string = '';
   empresa: string = '';
   pastaAtualId: string | null = null;
@@ -24,6 +25,7 @@ export class Orcamentos implements OnInit{
   ngOnInit(): void {
     const id = this.authService.getUsuarioId();
     const empresa = this.authService.getEmpresa();
+
 
     console.log('Usuário:', this.authService.getUser());
     console.log('ID:', this.authService.getUsuarioId());
@@ -45,10 +47,13 @@ export class Orcamentos implements OnInit{
     this.orcamentoService.listarPastas(this.usuarioId, this.empresa).subscribe(pastas => {
       const raiz = pastas.find(p => p.nome === 'Raiz');
       if (raiz) {
-        this.pastaAtualId = raiz.id || raiz._id;
-        this.pastas = [];
         const pastaId = raiz.id || raiz._id;
         this.pastaAtualId = pastaId;
+        this.caminhoPastas = [{ id: pastaId, nome: 'Raiz' }];
+
+        this.orcamentoService.listarPastas(this.usuarioId, this.empresa, pastaId).subscribe(subpastas => {
+          this.pastas = subpastas;
+        });
 
         this.orcamentoService.listarOrcamentosPorPasta(pastaId).subscribe(orcamentos => {
           this.orcamentos = orcamentos;
@@ -56,6 +61,7 @@ export class Orcamentos implements OnInit{
       }
     });
   }
+
 
 
   carregarConteudoDaPasta(pastaId: string): void {
@@ -72,7 +78,15 @@ export class Orcamentos implements OnInit{
     });
   }
 
-  abrirPasta(pastaId: string): void {
+  abrirPasta(pastaId: string, pastaNome: string): void {
+    const index = this.caminhoPastas.findIndex(p => p.id === pastaId);
+
+    if (index === -1) {
+      this.caminhoPastas.push({ id: pastaId, nome: pastaNome });
+    } else {
+      this.caminhoPastas = this.caminhoPastas.slice(0, index + 1);
+    }
+
     this.carregarConteudoDaPasta(pastaId);
   }
 

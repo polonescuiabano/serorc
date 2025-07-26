@@ -19,6 +19,8 @@ import {Router} from '@angular/router';
   styleUrl: './composicoes.css'
 })
 export class Composicoes {
+  mesSelecionado = '01';
+  anoSelecionado = '2025';
   query = '';
   searchBy = 'codigo';
   tipo = 'SINAPI';
@@ -33,8 +35,8 @@ export class Composicoes {
       return;
     }
 
-    const [ano, mes] = this.periodo.split('-');
-    const periodoFormatado = `${mes.padStart(2, '0')}-${ano}`;
+    const periodoFormatado = `${this.mesSelecionado}-${this.anoSelecionado}`;
+
 
     if (this.searchBy === 'codigo') {
       this.composicoesService.buscarPorCodigo(this.query, this.tipo, periodoFormatado).subscribe(data => {
@@ -84,6 +86,7 @@ export class Composicoes {
 
     this.resultados = resultadoFinal;
   }
+
 
   formatarData(data: any): string {
     let dt: Date;

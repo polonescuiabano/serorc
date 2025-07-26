@@ -19,12 +19,24 @@
       <label for="bdi">BDI</label>
       <input id="bdi" type="number"formControlName="bdi" placeholder="Digite o BDI" />
 
-      <label>Selecione os Bancos e Período</label>
-      <div class="banco">
-        <button class="btn-selecionar-banco" (click)="abrirSelecionarBanco()">
-          Selecionar Banco
-        </button>
+      <div formArrayName="bancos">
+        <div *ngFor="let bancoCtrl of bancosControls; let i = index" [formGroupName]="i" class="banco-lista">
+          <select formControlName="tipo">
+            <option value="">Selecione o banco</option>
+            <option value="SINAPI">SINAPI</option>
+            <option value="SICRO">SICRO</option>
+          </select>
+
+          <select formControlName="periodo">
+            <option value="">Selecione o período</option>
+            <option *ngFor="let mes of meses" [value]="mes.valor">{{ mes.label }}</option>
+          </select>
+
+          <button type="button" (click)="removerBanco(i)">Remover</button>
+        </div>
       </div>
+
+      <button type="button" (click)="adicionarBanco()">Adicionar Banco</button>
 
       <label>Encargos Sociais</label>
       <div class="radio-group">

@@ -3,12 +3,14 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { InsumosService } from '../../../services/insumos';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../services/auth.service';
+import {Sidebar} from '../../sidebar/sidebar';
+import {TopbarListacomp} from '../../topbar-listacomp/topbar-listacomp';
 
 @Component({
   selector: 'app-create-insumos',
   standalone: true,
   templateUrl: './create-insumos.html',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, Sidebar, TopbarListacomp],
   styleUrls: ['./create-insumos.css']
 })
 export class CreateInsumos {

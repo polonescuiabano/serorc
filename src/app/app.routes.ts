@@ -11,6 +11,8 @@ import {CreateComp} from './components/pages/create-comp/create-comp';
 import {Detalhescomposicao} from './components/pages/detalhescomposicao/detalhescomposicao';
 import {Eventograma} from './services/eventograma';
 import {EventogramaComponent} from './components/pages/eventograma/eventograma';
+import {Criarcotacao} from './components/pages/criarcotacao/criarcotacao';
+import {Relatorios} from './components/pages/relatorios/relatorios';
 
 export const routes: Routes = [
   {
@@ -23,6 +25,17 @@ export const routes: Routes = [
     component: Orcamentos,
     canActivate: [authGuard]
   },
+  {
+    path: 'criarcotacao',
+    component: Criarcotacao,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'relatorios',
+    component: Relatorios,
+    canActivate: [authGuard]
+  },
+
   {
     path: 'detalhes-orcamento/:id',
     component: Detalhesorcamento,
@@ -62,9 +75,12 @@ export const routes: Routes = [
     path: 'login',
     component: Loginpage
   },
+
   {
     path: '',
     redirectTo: '/login',
     pathMatch: 'full'
   },
 ];
+
+

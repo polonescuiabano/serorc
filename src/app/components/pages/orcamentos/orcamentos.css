@@ -49,7 +49,6 @@ ul li span:hover {
 
 /* Ícone (📁, 📄) integrado ao início do span */
 ul li span::before {
-  content: '📁';
   margin-right: 8px;
   font-size: 18px;
 }
@@ -74,4 +73,18 @@ ul li button {
 ul li button:hover {
   background-color: #dc3545;
   color: white;
+}
+
+.breadcrumb ul {
+  margin-top: 150px;
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 5px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.breadcrumb li {
+  display: inline;
 }

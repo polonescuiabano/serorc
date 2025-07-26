@@ -73,7 +73,6 @@ input {
   width: 100%;
   padding: 0.6rem;
   font-size: 1rem;
-  color: #f8fafc;
   background-color: var(--text-color);
   border: 1px solid #475569;
   border-radius: 8px;
@@ -102,6 +101,7 @@ input {
 .resultado-item:hover {
   background-color: #1e293b;
 }
+
 
 /* Item selecionado */
 .selecionado {
@@ -139,3 +139,5 @@ p {
   margin-top: 1rem;
   text-align: center;
 }
+
+

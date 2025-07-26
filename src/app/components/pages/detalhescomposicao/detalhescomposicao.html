@@ -3,12 +3,27 @@
 
 <!-- Lista de Insumos -->
 
+<h2>{{ composicao?.descricao }}</h2>
+
+<div class="valores-principais">
+  <p><strong>Valor Desonerado:</strong> {{ composicao?.precoDesonerado | number: '1.2-4' }}</p>
+  <p><strong>Valor Não Desonerado:</strong> {{ composicao?.precoNaoDesonerado | number: '1.2-4' }}</p>
+  </div>
+
 <button *ngIf="isProprio" (click)="iniciarAdicionar('insumo')">Adicionar Insumo</button>
-<ul *ngIf="composicao?.insumos?.length > 0; else semInsumos">
-  <li *ngFor="let insumo of composicao.insumos">
-    Código: {{ insumo.insumoId }} - Coeficiente: {{ insumo.coeficiente }}
+<ul *ngIf="insumos.length > 0; else semInsumos">
+  <li *ngFor="let insumo of insumos">
+    <div>
+      <strong>Código:</strong> {{ insumo.codigo }}<br />
+      <strong>Coeficiente:</strong> {{ insumo.coeficiente }}<br />
+      <strong>Preço Unitário Desonerado:</strong> {{ insumo.precoDesonerado | number: '1.4-4' }}<br />
+      <strong>Preço Unitário Não Desonerado:</strong> {{ insumo.precoNaoDesonerado | number: '1.4-4' }}<br />
+      <strong>Total Desonerado:</strong> {{ insumo.coeficiente * insumo.precoDesonerado | number: '1.4-4' }}<br />
+      <strong>Total Não Desonerado:</strong> {{ insumo.coeficiente * insumo.precoNaoDesonerado | number: '1.4-4' }}
+    </div>
   </li>
 </ul>
+
 <ng-template #semInsumos>
   <p>Não há insumos adicionados.</p>
 </ng-template>
@@ -16,9 +31,16 @@
 <!-- Lista de Composições Auxiliares -->
 
 <button *ngIf="isProprio" (click)="iniciarAdicionar('composicao')">Adicionar Composição Auxiliar</button>
-<ul *ngIf="composicao?.composicoesAuxiliares?.length > 0; else semCompsAux">
-  <li *ngFor="let compAux of composicao.composicoesAuxiliares">
-    Código: {{ compAux.codigo }} - Coeficiente: {{ compAux.coeficiente }}
+<ul *ngIf="composicoesAuxiliares.length > 0; else semCompsAux">
+  <li *ngFor="let compAux of composicoesAuxiliares">
+    <div>
+      <strong>Código:</strong> {{ compAux.codigo }}<br />
+      <strong>Coeficiente:</strong> {{ compAux.coeficiente }}<br />
+      <strong>Preço Unitário Desonerado:</strong> {{ compAux.precoDesonerado | number: '1.4-4' }}<br />
+      <strong>Preço Unitário Não Desonerado:</strong> {{ compAux.precoNaoDesonerado | number: '1.4-4' }}<br />
+      <strong>Total Desonerado:</strong> {{ compAux.coeficiente * compAux.precoDesonerado | number: '1.4-4' }}<br />
+      <strong>Total Não Desonerado:</strong> {{ compAux.coeficiente * compAux.precoNaoDesonerado | number: '1.4-4' }}
+    </div>
   </li>
 </ul>
 <ng-template #semCompsAux>
@@ -28,11 +50,12 @@
 <!-- Formulário de adição (só aparece quando estiver editando) -->
 <div *ngIf="editando" class="adicionar-form">
   <h4>Adicionar {{ editando.tipo === 'insumo' ? 'Insumo' : 'Composição Auxiliar' }}</h4>
-
-  <label>
-    Código:
-    <input [(ngModel)]="editando.buscaCodigo" placeholder="Código" />
-  </label>
+  <div class="codigo">
+    <label>
+      Código:
+      <input [(ngModel)]="editando.buscaCodigo" placeholder="Código" />
+    </label>
+  </div>
   <label>
     Descrição:
     <input [(ngModel)]="editando.buscaDescricao" placeholder="Descrição" />

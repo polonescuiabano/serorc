@@ -1,9 +1,10 @@
 /* You can add global styles to this file, and also import other style files */
 :root{
+  --body: #111111;
   --body-color: #E4E9F7;
-  --sidebar-color: rgb(0, 0, 0);
+  --sidebar-color: #121826;
   --primary-color: rgb(255, 255, 255);
-  --primary-color-light: rgba(0, 0, 0, 0.76);
+  --primary-color-light: #121826;
   --toggle-color: rgb(255, 255, 255);
   --text-color: rgb(255, 255, 255);
 
@@ -14,6 +15,7 @@
 }
 
 body.dark{
+  --body: white;
   --body-color: rgb(0, 0, 0);
   --sidebar-color: rgb(13, 43, 145);
   --primary-color: rgb(255, 255, 100);
@@ -21,3 +23,4 @@ body.dark{
   --toggle-color: rgb(255, 255, 255);
   --text-color: rgb(255, 255, 255);
 }
+

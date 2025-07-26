@@ -4,6 +4,9 @@ import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {Detalhesorcamento} from '../pages/detalhesorcamento/detalhesorcamento';
 import {DetalhesorcamentoService, OrcamentoDetalhes} from '../../services/detalhesorcamento';
+import * as XLSX from 'xlsx';
+import {Composicao, ComposicoesService} from '../../services/composicoes';
+import {firstValueFrom} from 'rxjs';
 
 
 @Component({
@@ -35,6 +38,8 @@ primeiroItem = '';
 ultimoItem = '';
 orcamentoId!: string;
 
+  arquivoExcel: File | null = null;
+  dadosExcel: any[] = [];
 modalAberto = false;
   anoProposta: number | null = null;
   numeroMeta: string = '';
@@ -51,22 +56,30 @@ isOrcamento: boolean= false;
   menuEventogramaAberto: boolean = false;
 
 
-constructor(private route: ActivatedRoute, private router: Router,   private detalhesOrcamentoService: DetalhesorcamentoService) {
+constructor(private route: ActivatedRoute, private router: Router,   private detalhesOrcamentoService: DetalhesorcamentoService,     private composicoesService: ComposicoesService) {
 }
 
-ngOnInit() {
-  this.route.paramMap.subscribe(params =>{
-    this.orcamentoId = params.get('id')!;
+  ngOnInit() {
+    this.route.paramMap.subscribe(params => {
+      this.orcamentoId = params.get('id')!;
+      this.carregarDadosOrcamento();
+    });
 
-  });
-  const url =this.router.url;
-  if (url.startsWith('/eventograma')){
-    this.isOrcamento= true;
+    const url = this.router.url;
+    if (url.startsWith('/eventograma')) {
+      this.isOrcamento = true;
+    }
   }
 
-}
 
-
+  onFileSelected(event: any): void {
+    const target: DataTransfer = <DataTransfer>(event.target);
+    if (target.files.length !== 1) {
+      alert('Por favor, selecione um único arquivo');
+      return;
+    }
+    this.arquivoExcel = target.files[0];
+  }
 
 
   carregarDadosOrcamento() {
@@ -100,13 +113,192 @@ ngOnInit() {
       return;
     }
 
-    console.log('Importando orçamento com os itens:', {
-      primeiroItem: this.primeiroItem,
-      ultimoItem: this.ultimoItem
-    });
+    if (!this.arquivoExcel) {
+      alert('Por favor, selecione um arquivo Excel para importar.');
+      return;
+    }
 
-    this.fecharModalImportar();
+    const reader: FileReader = new FileReader();
+    reader.onload = (e: any) => {
+      const bstr: string = e.target.result;
+      const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
+
+      console.log('Planilhas encontradas:', wb.SheetNames);
+
+      const wsname: string = wb.SheetNames[0]; // Certifique-se que é a planilha correta
+      const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+
+      const dados = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
+
+      console.log('Dados Excel (20 primeiras linhas):', dados.slice(0, 20));
+
+      this.dadosExcel = dados;
+
+      this.processarDadosExcel(dados);
+    };
+
+
+    reader.readAsBinaryString(this.arquivoExcel);
   }
+
+
+  async processarDadosExcel(dados: any[][]): Promise<void> {
+    const idxPrimeiro = Number(this.primeiroItem);
+    const idxUltimo = Number(this.ultimoItem);
+
+    if (isNaN(idxPrimeiro) || isNaN(idxUltimo)) {
+      alert('Por favor, insira números válidos para as linhas inicial e final.');
+      return;
+    }
+
+    console.log('Bancos disponíveis:', this.bancos);
+
+
+
+    console.log('Índice do primeiro item (zero-based):', idxPrimeiro);
+    console.log('Índice do último item (zero-based):', idxUltimo);
+
+    if (idxPrimeiro < 0 || idxUltimo >= dados.length) {
+      alert('Os índices de linha informados estão fora do intervalo do arquivo.');
+      return;
+    }
+
+    if (idxUltimo < idxPrimeiro) {
+      alert('O índice do último item não pode ser menor que o do primeiro.');
+      return;
+    }
+
+    for (let i = idxPrimeiro; i <= idxUltimo; i++) {
+      const linha = dados[i];
+      if (!linha) continue;
+
+      const nivel = linha[0];
+      const codigoItem = linha[1];
+      const banco = linha[2];
+      const quantidade = linha[5];
+
+      if (!codigoItem || !quantidade) continue;
+
+      const isEtapa = Number.isInteger(Number(nivel));
+
+      if (banco === 'PROPRIO') continue;
+
+      await this.adicionarItemOrcamento(codigoItem, quantidade, banco, isEtapa, nivel);
+    }
+
+
+    alert('Importação concluída.');
+  }
+
+
+  async adicionarItemOrcamento(
+    codigo: string,
+    quantidade: number,
+    banco: string,
+    isEtapa: boolean,
+    nivel: string
+  ): Promise<void> {
+    try {
+      const codigoLimpo = codigo.trim();
+      const bancoLimpo = banco.trim();
+
+      const periodo = this.buscarPeriodoBanco(bancoLimpo);
+
+      if (!periodo) {
+        console.warn(`⚠️ Período não encontrado para banco '${bancoLimpo}', pulando item '${codigoLimpo}'.`);
+        return;
+      }
+
+      if (isEtapa) {
+        const itemOrcamento = {
+          descricao: 'Etapa automática',
+          quantidade,
+          nivel,
+          tipo: 'etapa',
+          frentes_de_obra: []
+        };
+
+        await firstValueFrom(
+          this.detalhesOrcamentoService.adicionarItem(this.orcamentoId, itemOrcamento)
+        );
+
+        console.log(`✅ Etapa '${nivel}' adicionada com sucesso.`);
+        return;
+      }
+
+      const composicoes = await firstValueFrom(
+        this.composicoesService.buscarPorCodigo(codigoLimpo, bancoLimpo, periodo)
+      );
+
+      if (!composicoes || composicoes.length === 0) {
+        console.warn(`⚠️ Composição não encontrada para código '${codigoLimpo}' no banco '${bancoLimpo}' e período '${periodo}'.`);
+        return;
+      }
+
+      const composicao: Composicao = composicoes[0];
+
+      const encargosPercent = this.encargos === 'desonerado' ? 0 : (this.orcamento.encargosSociais === 'nao-desonerado' ? 0 : 0);
+      const bdiPercent = Number(this.bdi) || 0;
+
+      const precoBase = composicao.precoDesonerado;
+      const precoUnitario = precoBase * (1 + encargosPercent / 100) * (1 + bdiPercent / 100);
+
+      const itemOrcamento = {
+        codigo: composicao.codigo,
+        descricao: composicao.nome,
+        unidade: composicao.unidadeMedida,
+        quantidade,
+        banco: bancoLimpo,
+        precoUnitario,
+        tipo: 'composicao',
+        nivel,
+        frentes_de_obra: []
+      };
+
+      console.log('🧩 Adicionando item ao orçamento:', itemOrcamento);
+
+      await firstValueFrom(
+        this.detalhesOrcamentoService.adicionarItem(this.orcamentoId, itemOrcamento)
+      );
+
+      console.log(`✅ Item '${codigoLimpo}' adicionado com sucesso.`);
+
+    } catch (error: any) {
+      console.error(`❌ Erro ao adicionar item '${codigo}':`, error?.message || error);
+    }
+  }
+
+
+
+  buscarPeriodoBanco(banco: string): string | null {
+    const bancoInfo = this.bancos.find(b => b.nome === banco);
+
+    if (!bancoInfo || !bancoInfo.periodo) return null;
+
+    const mapaMeses: Record<string, string> = {
+      'janeiro': '01',
+      'fevereiro': '02',
+      'março': '03',
+      'abril': '04',
+      'maio': '05',
+      'junho': '06',
+      'julho': '07',
+      'agosto': '08',
+      'setembro': '09',
+      'outubro': '10',
+      'novembro': '11',
+      'dezembro': '12'
+    };
+
+    const [mesNome, ano] = bancoInfo.periodo.toLowerCase().split('/');
+
+    const mesNumero = mapaMeses[mesNome.trim()];
+    if (!mesNumero || !ano) return null;
+
+    return `${mesNumero}-${ano.trim()}`;
+  }
+
+
 
   abrirMenu(): void {
     this.menuAberto = true;

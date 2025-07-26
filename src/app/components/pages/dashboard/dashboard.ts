@@ -30,4 +30,3 @@ export class Dashboard {
     this.isSidebarClosed = !this.isSidebarClosed;
   }
 }
-

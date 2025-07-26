@@ -28,11 +28,9 @@ export class CreateComp {
     this.composicaoForm = this.fb.group({
       codigo: ['', Validators.required],
       descricao: ['', Validators.required],
-      // tipo não aparece, será sempre 'PROPRIO'
       unidadeMedida: ['', Validators.required],
-      // empresa vai ser setada automaticamente
-      precoDesonerado: [0, Validators.required],
-      precoNaoDesonerado: [0, Validators.required],
+      precoDesonerado: [0],
+      precoNaoDesonerado: [0],
       dataCotacao: ['', Validators.required]
     });
   }
@@ -49,8 +47,8 @@ export class CreateComp {
 
     const dto = {
       ...this.composicaoForm.value,
-      tipo: 'PROPRIO',           // tipo fixo
-      empresa: empresa,          // pega empresa do usuário
+      tipo: 'PROPRIO',
+      empresa: empresa,
       precoDesonerado: parseFloat(this.composicaoForm.value.precoDesonerado),
       precoNaoDesonerado: parseFloat(this.composicaoForm.value.precoNaoDesonerado)
     };
@@ -61,7 +59,6 @@ export class CreateComp {
         this.erro = null;
         this.composicaoForm.reset();
 
-        // Assuming your API returns the saved object with the id in `response.id`
         const newId = response.id;
 
         if (newId) {
@@ -69,7 +66,6 @@ export class CreateComp {
             queryParams: { dataCotacao: dto.dataCotacao }
           });
         } else {
-          // Handle missing id in response if needed
           this.erro = 'ID da composição não retornado pelo servidor.';
         }
       },

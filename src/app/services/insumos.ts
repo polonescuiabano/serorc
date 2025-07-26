@@ -24,6 +24,13 @@ export class InsumosService {
 
   constructor(private http: HttpClient) {}
 
+  buscarPorId(id: string, banco: string, periodo: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/insumos/${id}`, {
+      params: { banco, periodo }
+    });
+  }
+
+
   buscarPorNome(nome: string, tipo: string, periodo: string = ''): Observable<Insumo[]> {
     let params = periodo ? new HttpParams().set('periodo', periodo) : undefined;
     return this.http.get<Insumo[]>(`${this.baseUrl}/insumos/buscar-por-nome/${nome}/${tipo}`, { params });

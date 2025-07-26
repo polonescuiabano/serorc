@@ -51,22 +51,131 @@ export class Detalhescomposicao implements OnInit {
     this.carregarDetalhes();
   }
 
+  private async carregarDetalhesInsumos() {
+    const data = new Date(this.composicao?.dataCotacao);
+    const banco = this.composicao?.banco || 'SINAPI';
+    const periodo = this.formatPeriodo(data); // Deve retornar "MM/YYYY"
+
+    const carregados = await Promise.all(
+      this.insumos.map(async (i: any) => {
+        try {
+          const resultado = await this.insSvc.buscarPorId(i.insumoId, banco, periodo).toPromise();
+
+          console.log("Resultado do insumo: ", resultado);
+
+          const precoDesonerado = resultado.valorDesonerado ?? 0;
+          const precoNaoDesonerado = resultado.valorOnerado ?? 0;
+          const coeficiente = i.coeficiente ?? 0;
+
+          return {
+            ...i,
+            codigo: resultado.codigo,
+            descricao: resultado.nome,
+            unidadeMedida: resultado.unidadeMedida,
+            precoDesonerado,
+            precoNaoDesonerado,
+            totalDesonerado: precoDesonerado * coeficiente,
+            totalNaoDesonerado: precoNaoDesonerado * coeficiente
+          };
+        } catch (e) {
+          console.warn('Erro carregando insumo:', i.insumoId, e);
+          return {
+            ...i,
+            precoDesonerado: 0,
+            precoNaoDesonerado: 0,
+            totalDesonerado: 0,
+            totalNaoDesonerado: 0
+          };
+        }
+      })
+    );
+
+    this.insumos = carregados;
+  }
+
+
+  private async carregarDetalhesComposicoesAuxiliares() {
+    const data = new Date(this.composicao?.dataCotacao);
+    const banco = this.composicao?.banco || 'SINAPI';
+    const periodo = this.formatPeriodoComp(data);
+
+    const carregados = await Promise.all(
+      this.composicoesAuxiliares.map(async (c: any) => {
+        try {
+          const resultadoLista = await this.svc.buscarPorCodigo(c.codigo, banco, periodo).toPromise();
+          const resultado = resultadoLista?.[0] as any;
+          console.log("Resultado da composicao: ", resultado);
+          if (!resultado) throw new Error(`Composição código ${c.codigo} não encontrada`);
+
+          const coeficiente = c.coeficiente ?? 0;
+
+          // Aqui extrai o preço para o período correto dentro de precosCotacao
+          const precoPeriodo = resultado.precosCotacao?.find((p: any) => {
+            const dataCot = new Date(p.dataCotacao);
+            const mesAno = `${String(dataCot.getMonth() + 1).padStart(2, '0')}-${dataCot.getFullYear()}`;
+            return mesAno === periodo;
+          }) || {};
+
+          const precoDesonerado = precoPeriodo.precoDesonerado ?? 0;
+          const precoNaoDesonerado = precoPeriodo.precoNaoDesonerado ?? 0;
+
+          return {
+            ...c,
+            codigo: resultado.codigo,
+            descricao: resultado.nome,
+            unidadeMedida: resultado.unidadeMedida,
+            precoDesonerado,
+            precoNaoDesonerado,
+            totalDesonerado: precoDesonerado * coeficiente,
+            totalNaoDesonerado: precoNaoDesonerado * coeficiente
+          };
+        } catch (e) {
+          console.warn('Erro carregando composição auxiliar:', c.codigo, e);
+          return {
+            ...c,
+            precoDesonerado: 0,
+            precoNaoDesonerado: 0,
+            totalDesonerado: 0,
+            totalNaoDesonerado: 0
+          };
+        }
+      })
+    );
+
+    this.composicoesAuxiliares = carregados;
+  }
+
+
+
   carregarDetalhes() {
-    this.svc.getDetalhesComposicao(this.id).subscribe(data => {
+    this.svc.getDetalhesComposicao(this.id).subscribe(async data => {
       this.composicao = data;
       this.composicao.dataCotacao = data.precosCotacao?.[0]?.dataCotacao;
       this.insumos = data.insumos || [];
       this.composicoesAuxiliares = data.composicoesAuxiliares || [];
       this.isProprio = data.tipo === 'PROPRIO';
+
+      await this.carregarDetalhesInsumos();
+      await this.carregarDetalhesComposicoesAuxiliares();
+
       this.calcularTotal();
     });
   }
 
+
   calcularTotal() {
-    const somaInsumos = this.insumos.reduce((s, i) => s + i.coeficiente * i.precoDesonerado, 0);
-    const somaAux = this.composicoesAuxiliares.reduce((s, c) => s + c.coeficiente * c.precoDesonerado, 0);
-    this.totalComposicao = somaInsumos + somaAux + (this.composicao.coeficientePrincipal || 0);
+    const somaDesonerado = this.insumos.reduce((s, i) => s + (i.totalDesonerado || 0), 0)
+      + this.composicoesAuxiliares.reduce((s, c) => s + (c.totalDesonerado || 0), 0);
+
+    const somaNaoDesonerado = this.insumos.reduce((s, i) => s + (i.totalNaoDesonerado || 0), 0)
+      + this.composicoesAuxiliares.reduce((s, c) => s + (c.totalNaoDesonerado || 0), 0);
+
+    this.composicao.precoDesonerado = somaDesonerado;
+    this.composicao.precoNaoDesonerado = somaNaoDesonerado;
+
+    this.totalComposicao = somaDesonerado;
   }
+
 
   iniciarAdicionar(tipo: 'insumo' | 'composicao') {
     this.editando = {
@@ -164,6 +273,11 @@ export class Detalhescomposicao implements OnInit {
   }
 
   private formatPeriodo(date: Date): string {
+    const mm = String(date.getMonth() + 2).padStart(2, '0');
+    const yyyy = date.getFullYear();
+    return `${mm}/${yyyy}`;
+  }
+  private formatPeriodoComp(date: Date): string {
     const mm = String(date.getMonth() + 1).padStart(2, '0');
     const yyyy = date.getFullYear();
     return `${mm}-${yyyy}`;

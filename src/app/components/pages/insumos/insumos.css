@@ -8,7 +8,7 @@
 /* Formulário de busca */
 .search-form {
   display: flex;
-  margin-left: 200px;
+  margin-left: 300px;
   margin-top: 150px;
   flex-wrap: wrap;
   gap: 1rem;
@@ -31,7 +31,7 @@
 /* Campos de entrada */
 .search-form input,
 .search-form select {
-  padding: 0.5rem 0.75rem;
+  padding: 0.6rem 0.75rem;
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 1rem;
@@ -51,9 +51,10 @@
   background-color: #4a90e2;
   color: white;
   border: none;
-  padding: 0.6rem 1.2rem;
+  padding: 0.65rem 1.5rem;
   border-radius: 8px;
   font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }

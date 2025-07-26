@@ -54,6 +54,10 @@
         <label for="ultimoItem">Último Item do Orçamento:</label>
         <input type="text" id="ultimoItem" [(ngModel)]="ultimoItem" name="ultimoItem" />
       </div>
+      <div class="form-group">
+        <label for="arquivoExcel">Arquivo Excel:</label>
+        <input type="file" id="arquivoExcel" (change)="onFileSelected($event)" accept=".xls,.xlsx" />
+      </div>
       <div class="modal-buttons">
         <button type="button" class="btn-exportar" (click)="confirmarImportacao()">Importar</button>
         <button type="button" class="btn-cancelar" (click)="fecharModalImportar()">Cancelar</button>

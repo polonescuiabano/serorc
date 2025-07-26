@@ -17,15 +17,7 @@
     <input formControlName="unidadeMedida" />
   </div>
   <div>
-    <label>Preço Desonerado:</label>
-    <input type="number" step="0.01" formControlName="precoDesonerado" />
-  </div>
-  <div>
-    <label>Preço Não Desonerado:</label>
-    <input type="number" step="0.01" formControlName="precoNaoDesonerado" />
-  </div>
-  <div>
-    <label>Data da Cotação:</label>
+    <label>Data de Cotação:</label>
     <input type="date" formControlName="dataCotacao" />
   </div>
   <button type="submit" [disabled]="composicaoForm.invalid">Salvar</button>

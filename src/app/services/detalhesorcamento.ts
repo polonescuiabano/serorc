@@ -15,7 +15,7 @@ export interface PrecoCotacao {
 
 export interface ItemOrcamento {
   id: string;
-  nivel: number;
+  nivel: string;
   codigo: string;
   base: string;
   descricao: string;

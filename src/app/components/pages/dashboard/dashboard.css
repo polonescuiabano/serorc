@@ -1,1 +1,23 @@
+.botoes-dashboard {
+  display: flex;
+  gap: 20px;
+  margin-top: 30px;
+  justify-content: center;
+}
 
+.botoes-dashboard button {
+  background-color:var(--sidebar-color);
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.botoes-dashboard button:hover {
+  background-color: #357ab7;
+  transform: translateY(-2px);
+}

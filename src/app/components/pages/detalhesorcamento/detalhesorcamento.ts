@@ -86,18 +86,16 @@ export class Detalhesorcamento implements OnInit{
 
 
   iniciarAdicionarEtapa() {
-    // Pega os níveis que são somente raiz (sem ponto)
     const niveisRaiz = this.orcamento.itens
       .map(i => i.nivel.toString())
       .filter(n => !n.includes('.'))
       .map(n => parseInt(n, 10));
 
-    // Define o próximo nível raiz
     const proximoNivel = Math.max(0, ...niveisRaiz) + 1;
     const nivel = proximoNivel.toString();
 
     this.novaEtapa = {
-      nivel: proximoNivel,
+      nivel: nivel,
       descricao: '',
       quantidade: 1,
       tipo: 'etapa',
@@ -336,14 +334,23 @@ export class Detalhesorcamento implements OnInit{
   }
 
   iniciarNovaEtapa() {
-    const nivelMax = this.orcamento.itens.reduce((max, item) => Math.max(max, item.nivel), 0);
+    const niveisRaiz = this.orcamento.itens
+      .map(i => i.nivel.toString())
+      .filter(n => !n.includes('.'))
+      .map(n => parseInt(n, 10));
+
+    const maxNivel = niveisRaiz.length > 0 ? Math.max(...niveisRaiz) : 0;
+    const novoNivel = (maxNivel + 1).toString();
+
     this.novaEtapa = {
-      nivel: nivelMax + 1,
+      nivel: novoNivel,
       descricao: '',
       unidade: '',
       quantidade: 1,
+      tipo: 'etapa',
     };
   }
+
 
 
   recalcularEncargos(novoEncargo: 'desonerado' | 'nao-desonerado') {
