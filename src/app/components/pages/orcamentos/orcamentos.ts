@@ -90,6 +90,7 @@ export class Orcamentos implements OnInit{
     this.carregarConteudoDaPasta(pastaId);
   }
 
+
   abrirOrcamento(orcamentoId: string): void {
     this.router.navigate(['/detalhes-orcamento', orcamentoId]);
   }

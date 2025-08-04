@@ -75,16 +75,52 @@ ul li button:hover {
   color: white;
 }
 
-.breadcrumb ul {
-  margin-top: 150px;
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 5px;
-  font-weight: bold;
-  font-size: 14px;
+.breadcrumb {
+  margin-top: 145px;
+  margin-left: 320px;
+  padding: 10px 10px;
+  background-color: rgba(244, 244, 244, 0.96); /* ou a cor da topbar */
+  font-family: Arial, sans-serif;
 }
 
-.breadcrumb li {
-  display: inline;
+.breadcrumb ul {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
+
+.breadcrumb-item {
+  border: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+
+.breadcrumb-item span {
+  color: #fff; /* ou var(--text-color) */
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.breadcrumb-item.active span {
+  font-weight: bold;
+  cursor: default;
+}
+
+.breadcrumb-separator {
+  margin: 0 6px;
+  color: #ccc;
+}
+
+
+
+
+
+
+
+
+

@@ -107,7 +107,12 @@ constructor(private route: ActivatedRoute, private router: Router,   private det
     this.modalImportarAberto = false;
   }
 
+  importando = false;
+
+
   confirmarImportacao(): void {
+    if (this.importando) return; // previne cliques repetidos
+
     if (!this.primeiroItem || !this.ultimoItem) {
       alert('Preencha os dois campos!');
       return;
@@ -118,29 +123,27 @@ constructor(private route: ActivatedRoute, private router: Router,   private det
       return;
     }
 
+    this.importando = true;
+
     const reader: FileReader = new FileReader();
-    reader.onload = (e: any) => {
+    reader.onload = async (e: any) => {
       const bstr: string = e.target.result;
       const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
 
-      console.log('Planilhas encontradas:', wb.SheetNames);
-
-      const wsname: string = wb.SheetNames[0]; // Certifique-se que é a planilha correta
+      const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
 
       const dados = XLSX.utils.sheet_to_json(ws, { header: 1 }) as any[][];
 
-      console.log('Dados Excel (20 primeiras linhas):', dados.slice(0, 20));
-
       this.dadosExcel = dados;
 
-      this.processarDadosExcel(dados);
-    };
+      await this.processarDadosExcel(dados);
 
+      this.importando = false;
+    };
 
     reader.readAsBinaryString(this.arquivoExcel);
   }
-
 
   async processarDadosExcel(dados: any[][]): Promise<void> {
     const idxPrimeiro = Number(this.primeiroItem);
@@ -150,13 +153,6 @@ constructor(private route: ActivatedRoute, private router: Router,   private det
       alert('Por favor, insira números válidos para as linhas inicial e final.');
       return;
     }
-
-    console.log('Bancos disponíveis:', this.bancos);
-
-
-
-    console.log('Índice do primeiro item (zero-based):', idxPrimeiro);
-    console.log('Índice do último item (zero-based):', idxUltimo);
 
     if (idxPrimeiro < 0 || idxUltimo >= dados.length) {
       alert('Os índices de linha informados estão fora do intervalo do arquivo.');
@@ -172,22 +168,71 @@ constructor(private route: ActivatedRoute, private router: Router,   private det
       const linha = dados[i];
       if (!linha) continue;
 
-      const nivel = linha[0];
+      const nivelRaw = linha[0];
       const codigoItem = linha[1];
-      const banco = linha[2];
-      const quantidade = linha[5];
+      const descricao = linha[3];
+      const quantidadeRaw = linha[5];
 
-      if (!codigoItem || !quantidade) continue;
+      if (!nivelRaw || String(nivelRaw).trim() === '') continue;
 
-      const isEtapa = Number.isInteger(Number(nivel));
+      const quantidade = Number(quantidadeRaw);
+      if (isNaN(quantidade)) continue;
 
-      if (banco === 'PROPRIO') continue;
+      const codigoVazio = !codigoItem || String(codigoItem).trim() === '';
 
-      await this.adicionarItemOrcamento(codigoItem, quantidade, banco, isEtapa, nivel);
+      const nivelStr = String(nivelRaw).trim();
+
+      function isIntegerString(str: string): boolean {
+        return /^\d+$/.test(str);
+      }
+
+      function isDecimalOrComplex(str: string): boolean {
+        return /^(\d+\.)+\d+/.test(str) || /^\d+\.\d+$/.test(str);
+      }
+
+      if (codigoVazio && isIntegerString(nivelStr)) {
+        await this.adicionarEtapaOuSubetapa('etapa', descricao, quantidade, nivelStr);
+        continue;
+      }
+
+      if (codigoVazio && !isIntegerString(nivelStr)) {
+        await this.adicionarEtapaOuSubetapa('subetapa', descricao, quantidade, nivelStr);
+        continue;
+      }
+
+      if (!codigoVazio && quantidade > 0) {
+        await this.adicionarItemOrcamento(
+          String(codigoItem),
+          quantidade,
+          String(linha[2]),
+          false,
+          nivelStr
+        );
+      }
     }
 
-
     alert('Importação concluída.');
+  }
+
+  async adicionarEtapaOuSubetapa(
+    tipo: 'etapa' | 'subetapa',
+    descricao: string,
+    quantidade: number,
+    nivel: string
+  ) {
+    const item = {
+      descricao: descricao || (tipo === 'etapa' ? 'Etapa automática' : 'Subetapa automática'),
+      quantidade,
+      nivel,
+      tipo,
+      frentes_de_obra: []
+    };
+
+    await firstValueFrom(
+      this.detalhesOrcamentoService.adicionarItem(this.orcamentoId, item)
+    );
+
+    console.log(`✅ ${tipo === 'etapa' ? 'Etapa' : 'Subetapa'} '${nivel}' adicionada com sucesso.`);
   }
 
 
@@ -202,15 +247,8 @@ constructor(private route: ActivatedRoute, private router: Router,   private det
       const codigoLimpo = codigo.trim();
       const bancoLimpo = banco.trim();
 
-      const periodo = this.buscarPeriodoBanco(bancoLimpo);
-
-      if (!periodo) {
-        console.warn(`⚠️ Período não encontrado para banco '${bancoLimpo}', pulando item '${codigoLimpo}'.`);
-        return;
-      }
-
-      if (isEtapa) {
-        const itemOrcamento = {
+      if (!codigoLimpo && isEtapa) {
+        const itemEtapa = {
           descricao: 'Etapa automática',
           quantidade,
           nivel,
@@ -219,10 +257,34 @@ constructor(private route: ActivatedRoute, private router: Router,   private det
         };
 
         await firstValueFrom(
-          this.detalhesOrcamentoService.adicionarItem(this.orcamentoId, itemOrcamento)
+          this.detalhesOrcamentoService.adicionarItem(this.orcamentoId, itemEtapa)
         );
 
         console.log(`✅ Etapa '${nivel}' adicionada com sucesso.`);
+        return;
+      }
+
+      if (!codigoLimpo && !isEtapa) {
+        const itemSubetapa = {
+          descricao: 'Subetapa automática',
+          quantidade,
+          nivel,
+          tipo: 'subetapa',
+          frentes_de_obra: []
+        };
+
+        await firstValueFrom(
+          this.detalhesOrcamentoService.adicionarItem(this.orcamentoId, itemSubetapa)
+        );
+
+        console.log(`📁 Subetapa '${nivel}' adicionada com sucesso.`);
+        return;
+      }
+
+
+      const periodo = this.buscarPeriodoBanco(bancoLimpo);
+      if (!periodo) {
+        console.warn(`⚠️ Período não encontrado para banco '${bancoLimpo}', pulando item '${codigoLimpo}'.`);
         return;
       }
 
@@ -267,6 +329,7 @@ constructor(private route: ActivatedRoute, private router: Router,   private det
       console.error(`❌ Erro ao adicionar item '${codigo}':`, error?.message || error);
     }
   }
+
 
 
 

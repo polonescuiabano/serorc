@@ -3,9 +3,14 @@
 
 <nav class="breadcrumb">
   <ul>
-    <li *ngFor="let pasta of caminhoPastas; let i = index">
-      <span (click)="abrirPasta(pasta.id, pasta.nome)" style="cursor: pointer;">{{ pasta.nome }}</span>
-      <span *ngIf="i < caminhoPastas.length - 1"> / </span>
+    <li *ngFor="let pasta of caminhoPastas; let i = index"
+        class="breadcrumb-item"
+        [class.active]="i === caminhoPastas.length - 1">
+      <span
+        (click)="i < caminhoPastas.length - 1 && abrirPasta(pasta.id, pasta.nome)">
+        {{ pasta.nome }}
+      </span>
+      <span class="breadcrumb-separator" *ngIf="i < caminhoPastas.length - 1"> > </span>
     </li>
   </ul>
 </nav>

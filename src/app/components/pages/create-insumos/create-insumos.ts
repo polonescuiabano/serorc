@@ -29,7 +29,7 @@ export class CreateInsumos {
       // tipo fixo, não aparece no form
       unidadeMedida: [''],
       valorDesonerado: ['', Validators.required],
-      valorOnerado: ['', Validators.required],
+      valorNaoDesonerado: ['', Validators.required],
       data: ['', Validators.required]
     });
   }
@@ -51,7 +51,7 @@ export class CreateInsumos {
 
     const payload = {
       ...this.insumoForm.value,
-      tipo: 'PROPRIO',          // tipo fixo
+      tipo: 'PROPRIO',
       empresa: empresa,
       valorDesonerado: parseFloat(this.insumoForm.value.valorDesonerado),
       valorNaoDesonerado: parseFloat(this.insumoForm.value.valorNaoDesonerado)

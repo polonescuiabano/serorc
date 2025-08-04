@@ -59,7 +59,9 @@
         <input type="file" id="arquivoExcel" (change)="onFileSelected($event)" accept=".xls,.xlsx" />
       </div>
       <div class="modal-buttons">
-        <button type="button" class="btn-exportar" (click)="confirmarImportacao()">Importar</button>
+        <button type="button" class="btn-exportar" (click)="confirmarImportacao()" [disabled]="importando">
+          Importar
+        </button>
         <button type="button" class="btn-cancelar" (click)="fecharModalImportar()">Cancelar</button>
       </div>
     </form>

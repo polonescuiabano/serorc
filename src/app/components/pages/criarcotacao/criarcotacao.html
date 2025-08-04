@@ -1,53 +1,64 @@
 <app-sidebar></app-sidebar>
 
-<body>
-<title>Cadastrar Orçamento</title>
-<div class="form-section">
-  <h2>Dados da Empresa</h2>
+<div class="cotacao-container">
+  <form (ngSubmit)="onSubmit()" enctype="multipart/form-data" class="cotacao-form">
+    <!-- Dados da empresa -->
+    <div class="form-section">
+      <h2>Dados da Empresa</h2>
 
-  <label>Nome da Empresa</label>
-  <input type="text">
+      <label>Nome da Empresa</label>
+      <input type="text" [(ngModel)]="empresa.nome" name="nome_empresa" required>
 
-  <label>CNPJ</label>
-  <input type="text">
+      <label>CNPJ</label>
+      <input type="text" [(ngModel)]="empresa.cnpj" name="cnpj" required>
 
-  <label>Telefone</label>
-  <input type="text">
+      <label>Telefone</label>
+      <input type="text" [(ngModel)]="empresa.telefone" name="telefone" required>
 
-  <label>E-mail</label>
-  <input type="email">
+      <label>E-mail</label>
+      <input type="email" [(ngModel)]="empresa.email" name="email" required>
 
-  <label>Vendedor</label>
-  <input type="text">
+      <label>Vendedor</label>
+      <input type="text" [(ngModel)]="empresa.vendedor" name="vendedor" required>
 
-  <label>Data da Cotação</label>
-  <input type="date" class="campo-data">
-</div>
-<div class="form-section">
-  <h2>Insumos do Orçamento</h2>
-
-  <label>Código do Insumo</label>
-  <input type="text">
-
-  <label>Nome do Insumo</label>
-  <input type="text">
-
-  <div class="grid-2">
-    <div>
-      <label>Unidade de Medida</label>
-      <input type="text">
+      <label>Data da Cotação</label>
+      <input type="date" [(ngModel)]="empresa.dataCotacao" name="data_cotacao" required>
     </div>
-    <div>
-      <label>Preço do Insumo</label>
-      <input type="number" step="0.01">
+
+    <!-- Insumos -->
+    <div class="form-section">
+      <h2>Insumos do Orçamento</h2>
+
+      <div *ngFor="let insumo of insumos; let i = index" class="insumo-item">
+        <label>Código do Insumo</label>
+        <input type="text" [(ngModel)]="insumo.codigo" name="codigo_insumo{{i}}" required>
+
+        <label>Nome do Insumo</label>
+        <input type="text" [(ngModel)]="insumo.nome" name="nome_insumo{{i}}" required>
+
+        <div class="grid-2">
+          <div>
+            <label>Unidade de Medida</label>
+            <input type="text" [(ngModel)]="insumo.unidade" name="unidade_medida{{i}}" required>
+          </div>
+          <div>
+            <label>Preço do Insumo</label>
+            <input type="number" [(ngModel)]="insumo.preco" name="preco{{i}}" step="0.01" required>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="add-button" (click)="adicionarInsumo()">+ Adicionar Insumo</button>
     </div>
-  </div>
 
-  <button class="add-button">Adicionar Insumo</button>
-</div>
+    <!-- Upload -->
+    <div class="form-section upload-section">
+      <label class="upload-label">Anexar Documento (.pdf, .doc, .xls)</label>
+      <input type="file" (change)="onFileSelected($event)" accept=".pdf,.doc,.docx,.xls,.xlsx" required>
+    </div>
 
-<div class="form-section upload-section">
-  <label class="upload-label">Documento / PDF (clique para selecionar o arquivo)</label>
-  <input type="file" accept=".pdf" class="file-input">
+    <div class="form-footer">
+      <button type="submit" class="submit-button">Enviar Orçamento</button>
+    </div>
+  </form>
 </div>
-</body>

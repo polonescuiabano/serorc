@@ -1,6 +1,5 @@
 <app-sidebar></app-sidebar>
 
-<title>Relatório de Insumos</title>
 <div class="relatorio-container">
   <h1>Relatório de Insumos</h1>
 
@@ -8,43 +7,54 @@
     <h2>Filtro de Relatório</h2>
 
     <div class="campo">
-      <label for="medidaCalculo">Calcular:</label>
-      <select id="medidaCalculo">
-        <option value="">Escolha a medida</option>
-      </select>
-    </div>
-    <div class="campo">
-      <label for="medida">Medida:</label>
-      <select id="medida">
+      <label for="calcular">Calcular:</label>
+      <select id="calcular">
         <option value="">Selecione</option>
+        <option value="media">Média</option>
+        <option value="mediana">Mediana</option>
       </select>
     </div>
 
     <div class="campo">
-      <label for="tipoPesquisa">Tipo de Pesquisa:</label>
-      <input type="text" id="tipoPesquisa" placeholder="Ex: Por descrição">
+      <label> Termo de Pesquisa: </label>
+      <select [(ngModel)]="searchBy">
+        <option value="codigo">Código</option>
+        <option value="descricao">Descrição</option>
+      </select>
     </div>
 
     <div class="campo">
       <label for="descricao">Descrição:</label>
-      <input type="text" id="descricao" placeholder="Descrição do item">
+      <input type="text" id="descricao" placeholder="Descrição ou código do item" [(ngModel)]="query" />
     </div>
 
-    <div class="campo">
-      <label for="termoPesquisa">Termo de Pesquisa:</label>
-      <input type="text" id="termoPesquisa" placeholder="Digite o termo">
-    </div>
 
-    <div class="campo">
-      <label>Selecione os insumos:</label>
-      <div class="checkbox-list">
-        <label><input type="teste"></label>
-
-      </div>
-    </div>
     <div class="botoes">
       <button class="btn-gerar">Gerar Relatório</button>
-      <button class="btn-limpar">Limpar Pesquisa</button>
+      <button class="btn-buscar" (click)="buscar()">Buscar</button>
+      <button class="btn-limpar" (click)="limpar()">Limpar Pesquisa</button>
     </div>
+  </div>
+
+  <div *ngIf="resultados.length > 0" class="resultado-relatorio">
+    <h3>Resultados:</h3>
+    <table>
+      <thead>
+      <tr>
+        <th>Código</th>
+        <th>Nome</th>
+        <th>Unidade</th>
+        <th>Tipo</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let insumo of resultados">
+        <td>{{ insumo.codigo }}</td>
+        <td>{{ insumo.nome }}</td>
+        <td>{{ insumo.unidadeMedida }}</td>
+        <td>{{ insumo.tipo }}</td>
+      </tr>
+      </tbody>
+    </table>
   </div>
 </div>

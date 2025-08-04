@@ -46,6 +46,9 @@ export class InsumosService {
     });
   }
 
+  salvarCotacao(formData: FormData): Observable<any> {
+    return this.http.post(`${this.baseUrl}/cotacoes`, formData);
+  }
 
   buscarTodos(): Observable<Insumo[]> {
     return this.http.get<Insumo[]>(`${this.baseUrl}/insumos/todos`);
