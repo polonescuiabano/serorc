@@ -52,7 +52,8 @@ export class Criarcotacao {
         codigo: i.codigo,
         nome: i.nome,
         unidade: i.unidade,
-        preco: Number(i.preco)
+        preco: Number(i.preco),
+        dataCotacao: this.empresa.dataCotacao
       }))
     };
 

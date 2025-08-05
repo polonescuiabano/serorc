@@ -8,7 +8,7 @@
 
     <div class="campo">
       <label for="calcular">Calcular:</label>
-      <select id="calcular">
+      <select id="calcular" [(ngModel)]="metodoCalculo">
         <option value="">Selecione</option>
         <option value="media">Média</option>
         <option value="mediana">Mediana</option>
@@ -24,15 +24,14 @@
     </div>
 
     <div class="campo">
-      <label for="descricao">Descrição:</label>
-      <input type="text" id="descricao" placeholder="Descrição ou código do item" [(ngModel)]="query" />
+      <label for="descricao">Descrição ou código:</label>
+      <input type="text" id="descricao" [(ngModel)]="query" placeholder="Digite aqui..." />
     </div>
 
-
     <div class="botoes">
-      <button class="btn-gerar">Gerar Relatório</button>
-      <button class="btn-buscar" (click)="buscar()">Buscar</button>
-      <button class="btn-limpar" (click)="limpar()">Limpar Pesquisa</button>
+      <button (click)="gerarRelatorio()" class="btn-gerar">Gerar Relatório</button>
+      <button (click)="buscar()" class="btn-buscar">Buscar</button>
+      <button (click)="limpar()" class="btn-limpar">Limpar Pesquisa</button>
     </div>
   </div>
 
@@ -45,6 +44,7 @@
         <th>Nome</th>
         <th>Unidade</th>
         <th>Tipo</th>
+        <th>Ações</th>
       </tr>
       </thead>
       <tbody>
@@ -53,8 +53,21 @@
         <td>{{ insumo.nome }}</td>
         <td>{{ insumo.unidadeMedida }}</td>
         <td>{{ insumo.tipo }}</td>
+        <td>
+          <button (click)="selecionar(insumo)" [disabled]="isSelecionado(insumo)">Selecionar</button>
+        </td>
       </tr>
       </tbody>
     </table>
+  </div>
+
+  <div *ngIf="insumosSelecionados.length > 0" class="insumos-selecionados">
+    <h3>Selecionados para Relatório:</h3>
+    <ul>
+      <li *ngFor="let i of insumosSelecionados">
+        {{ i.codigo }} - {{ i.nome }}
+        <button (click)="removerSelecionado(i)">Remover</button>
+      </li>
+    </ul>
   </div>
 </div>

@@ -7,6 +7,12 @@ export interface PrecoCotacao {
   dataCotacao: string;
   precoDesonerado: number;
   precoNaoDesonerado: number;
+  empresa: string;
+  telefone: string;
+  cnpj: string;
+  vendedor: string;
+  arquivoNome?: string;
+  arquivoCaminho?: string;
 }
 
 export interface Insumo {
