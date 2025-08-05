@@ -4,6 +4,7 @@ import {Sidebar} from '../../sidebar/sidebar';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {InsumosService} from '../../../services/insumos';
 import {CommonModule} from '@angular/common';
+import {AuthService} from '../../../services/auth.service';
 
 @Component({
   selector: 'app-insumos',
@@ -26,7 +27,11 @@ export class Insumos {
   periodo = '';
   resultados: any[] = [];
 
-  constructor(private insumosService: InsumosService) {}
+  constructor(private insumosService: InsumosService,   private authService: AuthService) {}
+
+  isInsumoProprio(): boolean {
+    return this.tipo === 'PROPRIO';
+  }
 
   buscar() {
     if (!this.query) {
@@ -35,20 +40,45 @@ export class Insumos {
     }
 
     const periodoFormatado = `${this.mesSelecionado}-${this.anoSelecionado}`;
+    const empresa = this.authService.getEmpresa();
 
+    if (!empresa) {
+      this.resultados = [];
+      console.error('Empresa não encontrada no usuário logado.');
+      return;
+    }
 
-    if (this.searchBy === 'codigo') {
-      this.insumosService.buscarPorCodigo(this.query, this.tipo, periodoFormatado).subscribe(data => {
-        this.processarResultado(data);
-      }, err => {
-        this.resultados = [];
-      });
-    } else if (this.searchBy === 'descricao') {
-      this.insumosService.buscarPorNome(this.query, this.tipo, periodoFormatado).subscribe(data => {
-        this.processarResultado(data);
-      }, err => {
-        this.resultados = [];
-      });
+    const tipoBusca = this.searchBy;
+
+    if (this.isInsumoProprio()) {
+      if (tipoBusca === 'codigo') {
+        this.insumosService.buscarProprioPorCodigo(this.query, this.tipo, empresa).subscribe(data => {
+          this.processarResultado(data);
+        }, err => {
+          this.resultados = [];
+        });
+      } else if (tipoBusca === 'descricao') {
+        this.insumosService.buscarProprioPorNome(this.query, this.tipo, empresa).subscribe(data => {
+          this.processarResultado(data);
+        }, err => {
+          this.resultados = [];
+        });
+      }
+    } else {
+      // Busca padrão
+      if (tipoBusca === 'codigo') {
+        this.insumosService.buscarPorCodigo(this.query, this.tipo, periodoFormatado).subscribe(data => {
+          this.processarResultado(data);
+        }, err => {
+          this.resultados = [];
+        });
+      } else if (tipoBusca === 'descricao') {
+        this.insumosService.buscarPorNome(this.query, this.tipo, periodoFormatado).subscribe(data => {
+          this.processarResultado(data);
+        }, err => {
+          this.resultados = [];
+        });
+      }
     }
   }
 

@@ -4,6 +4,7 @@ import {Sidebar} from '../../sidebar/sidebar';
 import {FormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {InsumosService} from '../../../services/insumos';
+import {AuthService} from '../../../services/auth.service';
 
 @Component({
   selector: 'app-criarcotacao',
@@ -30,7 +31,8 @@ export class Criarcotacao {
 
   arquivoSelecionado!: File;
 
-  constructor(private http: HttpClient, private insumosService: InsumosService) {}
+  constructor(private http: HttpClient, private insumosService: InsumosService,  private authService: AuthService
+) {}
 
   adicionarInsumo() {
     this.insumos.push({ codigo: '', nome: '', unidade: '', preco: '' });
@@ -41,6 +43,15 @@ export class Criarcotacao {
   }
 
   onSubmit() {
+
+    const empresaUsuario = this.authService.getEmpresa();
+
+    if (!empresaUsuario) {
+      alert('Empresa do usuário não encontrada. Faça login novamente.');
+      return;
+    }
+
+
     const cotacaoDto = {
       nomeEmpresa: this.empresa.nome,
       cnpj: this.empresa.cnpj,
@@ -53,7 +64,8 @@ export class Criarcotacao {
         nome: i.nome,
         unidade: i.unidade,
         preco: Number(i.preco),
-        dataCotacao: this.empresa.dataCotacao
+        dataCotacao: this.empresa.dataCotacao,
+        empresa: empresaUsuario
       }))
     };
 

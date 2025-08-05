@@ -52,6 +52,24 @@ export class InsumosService {
     });
   }
 
+  buscarProprioPorCodigo(codigo: string, tipo: string, empresa: string): Observable<Insumo[]> {
+    const params = new HttpParams()
+      .set('codigo', codigo)
+      .set('tipo', tipo)
+      .set('empresa', empresa);
+
+    return this.http.get<Insumo[]>(`${this.baseUrl}/insumos/buscar-por-codigo-empresa`, { params });
+  }
+
+  buscarProprioPorNome(nome: string, tipo: string, empresa: string): Observable<Insumo[]> {
+    const params = new HttpParams()
+      .set('nome', nome)
+      .set('tipo', tipo)
+      .set('empresa', empresa);
+
+    return this.http.get<Insumo[]>(`${this.baseUrl}/insumos/buscar-por-nome-empresa`, { params });
+  }
+
   salvarCotacao(formData: FormData): Observable<any> {
     return this.http.post(`${this.baseUrl}/cotacoes`, formData);
   }
